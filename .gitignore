@@ -1,7 +1,6 @@
 ###> symfony/framework-bundle ###
-/.env.local
-/.env.local.php
-/.env.*.local
+/.env
+/.env.php
 /config/secrets/prod/prod.decrypt.private.php
 /public/bundles/
 /var/
@@ -17,3 +16,5 @@
 .idea/
 .vscode/
 ###< IDE files ###
+
+# Ignorer le fichier .env 
