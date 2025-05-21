@@ -18,3 +18,6 @@
 ###< IDE files ###
 
 # Ignorer le fichier .env 
+###> lexik/jwt-authentication-bundle ###
+/config/jwt/*.pem
+###< lexik/jwt-authentication-bundle ###
