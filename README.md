@@ -92,3 +92,43 @@ L'API est accessible à l'adresse suivante :
 Pour arrêter le serveur, vous pouvez simplement interrompre le processus dans le terminal avec Ctrl + C.
 
 
+Pour la partie JWT :
+
+1. Générer les clés JWT
+
+    php bin/console lexik:jwt:generate-keypair
+
+2. Configurer le fichier .env
+
+    JWT_SECRET_KEY=your_secret_key_here
+    JWT_PUBLIC_KEY=your_public_key_here
+    JWT_PASSPHRASE=your_passphrase_here
+
+3. Configurer le fichier security.yaml
+
+    security:
+        # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
+        password_hashers:
+            Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+
+4. Configurer le fichier lexik_jwt_authentication.yaml
+
+    secret_key: "%env(resolve:JWT_SECRET_KEY)%"
+    public_key: "%env(resolve:JWT_PUBLIC_KEY)%"
+    pass_phrase: "%env(JWT_PASSPHRASE)%"
+    token_ttl: 3600
+    user_id_claim: username
+
+5. Configurer le fichier config/packages/lexik_jwt_authentication.yaml
+
+    secret_key: "%env(resolve:JWT_SECRET_KEY)%"
+    public_key: "%env(resolve:JWT_PUBLIC_KEY)%"
+    pass_phrase: "%env(JWT_PASSPHRASE)%"    
+
+6. Configurer le fichier config/packages/security.yaml
+
+    security:
+        # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
+        password_hashers:
+            Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+
