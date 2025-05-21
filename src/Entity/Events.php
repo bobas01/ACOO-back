@@ -54,10 +54,17 @@ class Events
     #[ORM\OneToMany(targetEntity: News::class, mappedBy: 'id_event')]
     private Collection $news;
 
+    /**
+     * @var Collection<int, images>
+     */
+    #[ORM\OneToMany(targetEntity: images::class, mappedBy: 'events')]
+    private Collection $image;
+
     public function __construct()
     {
         $this->id_team = new ArrayCollection();
         $this->news = new ArrayCollection();
+        $this->image = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -209,6 +216,36 @@ class Events
             // set the owning side to null (unless already changed)
             if ($news->getIdEvent() === $this) {
                 $news->setIdEvent(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, images>
+     */
+    public function getImage(): Collection
+    {
+        return $this->image;
+    }
+
+    public function addImage(images $image): static
+    {
+        if (!$this->image->contains($image)) {
+            $this->image->add($image);
+            $image->setEvents($this);
+        }
+
+        return $this;
+    }
+
+    public function removeImage(images $image): static
+    {
+        if ($this->image->removeElement($image)) {
+            // set the owning side to null (unless already changed)
+            if ($image->getEvents() === $this) {
+                $image->setEvents(null);
             }
         }
 

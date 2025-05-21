@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\PicturesRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -16,8 +18,7 @@ class Pictures
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $imageUrl = null;
+   
 
     #[ORM\Column(type: Types::TEXT)]
     private ?string $description = null;
@@ -25,21 +26,20 @@ class Pictures
     #[ORM\ManyToOne(inversedBy: 'pictures')]
     private ?gallery $id_gallery = null;
 
+    /**
+     * @var Collection<int, images>
+     */
+    #[ORM\OneToMany(targetEntity: images::class, mappedBy: 'pictures')]
+    private Collection $image;
+
+    public function __construct()
+    {
+        $this->image = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getImageUrl(): ?string
-    {
-        return $this->imageUrl;
-    }
-
-    public function setImageUrl(string $imageUrl): static
-    {
-        $this->imageUrl = $imageUrl;
-
-        return $this;
     }
 
     public function getDescription(): ?string
@@ -62,6 +62,36 @@ class Pictures
     public function setIdGallery(?gallery $id_gallery): static
     {
         $this->id_gallery = $id_gallery;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, images>
+     */
+    public function getImage(): Collection
+    {
+        return $this->image;
+    }
+
+    public function addImage(images $image): static
+    {
+        if (!$this->image->contains($image)) {
+            $this->image->add($image);
+            $image->setPictures($this);
+        }
+
+        return $this;
+    }
+
+    public function removeImage(images $image): static
+    {
+        if ($this->image->removeElement($image)) {
+            // set the owning side to null (unless already changed)
+            if ($image->getPictures() === $this) {
+                $image->setPictures(null);
+            }
+        }
 
         return $this;
     }

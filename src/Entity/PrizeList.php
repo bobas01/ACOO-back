@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\PrizeListRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: PrizeListRepository::class)]
@@ -35,6 +37,17 @@ class PrizeList
 
     #[ORM\Column]
     private ?int $year = null;
+
+    /**
+     * @var Collection<int, images>
+     */
+    #[ORM\OneToMany(targetEntity: images::class, mappedBy: 'prizeList')]
+    private Collection $image;
+
+    public function __construct()
+    {
+        $this->image = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -121,6 +134,36 @@ class PrizeList
     public function setYear(int $year): static
     {
         $this->year = $year;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, images>
+     */
+    public function getImage(): Collection
+    {
+        return $this->image;
+    }
+
+    public function addImage(images $image): static
+    {
+        if (!$this->image->contains($image)) {
+            $this->image->add($image);
+            $image->setPrizeList($this);
+        }
+
+        return $this;
+    }
+
+    public function removeImage(images $image): static
+    {
+        if ($this->image->removeElement($image)) {
+            // set the owning side to null (unless already changed)
+            if ($image->getPrizeList() === $this) {
+                $image->setPrizeList(null);
+            }
+        }
 
         return $this;
     }

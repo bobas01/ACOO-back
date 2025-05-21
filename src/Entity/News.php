@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\NewsRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -36,6 +38,17 @@ class News
 
     #[ORM\ManyToOne(inversedBy: 'news')]
     private ?admin $id_admin = null;
+
+    /**
+     * @var Collection<int, images>
+     */
+    #[ORM\OneToMany(targetEntity: images::class, mappedBy: 'news')]
+    private Collection $image;
+
+    public function __construct()
+    {
+        $this->image = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -122,6 +135,36 @@ class News
     public function setIdAdmin(?admin $id_admin): static
     {
         $this->id_admin = $id_admin;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, images>
+     */
+    public function getImage(): Collection
+    {
+        return $this->image;
+    }
+
+    public function addImage(images $image): static
+    {
+        if (!$this->image->contains($image)) {
+            $this->image->add($image);
+            $image->setNews($this);
+        }
+
+        return $this;
+    }
+
+    public function removeImage(images $image): static
+    {
+        if ($this->image->removeElement($image)) {
+            // set the owning side to null (unless already changed)
+            if ($image->getNews() === $this) {
+                $image->setNews(null);
+            }
+        }
 
         return $this;
     }
