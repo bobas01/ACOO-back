@@ -41,7 +41,7 @@ class PrizeList
     /**
      * @var Collection<int, images>
      */
-    #[ORM\OneToMany(targetEntity: images::class, mappedBy: 'prizeList')]
+    #[ORM\OneToMany(targetEntity: Images::class, mappedBy: 'prizeList')]
     private Collection $image;
 
     public function __construct()

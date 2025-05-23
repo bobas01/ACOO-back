@@ -8,6 +8,11 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Sports;
+use App\Entity\Teams;
+use App\Entity\News;
+use App\Entity\Images;
+
 
 #[ORM\Entity(repositoryClass: EventsRepository::class)]
 #[ApiResource]
@@ -57,7 +62,7 @@ class Events
     /**
      * @var Collection<int, images>
      */
-    #[ORM\OneToMany(targetEntity: images::class, mappedBy: 'events')]
+    #[ORM\OneToMany(targetEntity: Images::class, mappedBy: 'events')]
     private Collection $image;
 
     public function __construct()

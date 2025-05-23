@@ -42,7 +42,7 @@ class News
     /**
      * @var Collection<int, images>
      */
-    #[ORM\OneToMany(targetEntity: images::class, mappedBy: 'news')]
+    #[ORM\OneToMany(targetEntity: Images::class, mappedBy: 'news')]
     private Collection $image;
 
     public function __construct()

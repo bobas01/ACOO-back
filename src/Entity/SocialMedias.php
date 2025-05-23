@@ -29,7 +29,7 @@ class SocialMedias
     /**
      * @var Collection<int, images>
      */
-    #[ORM\OneToMany(targetEntity: images::class, mappedBy: 'socialMedias')]
+    #[ORM\OneToMany(targetEntity: Images::class, mappedBy: 'socialMedias')]
     private Collection $image;
 
     public function __construct()

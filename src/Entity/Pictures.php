@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Gallery;
 
 #[ORM\Entity(repositoryClass: PicturesRepository::class)]
 #[ApiResource]
@@ -18,7 +19,7 @@ class Pictures
     #[ORM\Column]
     private ?int $id = null;
 
-   
+
 
     #[ORM\Column(type: Types::TEXT)]
     private ?string $description = null;
@@ -29,7 +30,7 @@ class Pictures
     /**
      * @var Collection<int, images>
      */
-    #[ORM\OneToMany(targetEntity: images::class, mappedBy: 'pictures')]
+    #[ORM\OneToMany(targetEntity: Images::class, mappedBy: 'pictures')]
     private Collection $image;
 
     public function __construct()

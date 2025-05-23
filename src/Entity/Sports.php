@@ -48,7 +48,7 @@ class Sports
     /**
      * @var Collection<int, images>
      */
-    #[ORM\OneToMany(targetEntity: images::class, mappedBy: 'sports')]
+    #[ORM\OneToMany(targetEntity: Images::class, mappedBy: 'sports')]
     private Collection $image;
 
     public function __construct()
