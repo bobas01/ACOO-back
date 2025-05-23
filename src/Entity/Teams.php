@@ -35,6 +35,9 @@ class Teams
     #[ORM\OneToMany(targetEntity: RecurringSchedule::class, mappedBy: 'id_team')]
     private Collection $recurringSchedules;
 
+    #[ORM\Column(length: 255)]
+    private ?string $role = null;
+
     public function __construct()
     {
         $this->events = new ArrayCollection();
@@ -123,6 +126,18 @@ class Teams
                 $recurringSchedule->setIdTeam(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getRole(): ?string
+    {
+        return $this->role;
+    }
+
+    public function setRole(string $role): static
+    {
+        $this->role = $role;
 
         return $this;
     }

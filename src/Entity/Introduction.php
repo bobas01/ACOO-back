@@ -2,34 +2,71 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Metadata\ApiResource;
-use App\Repository\IntroductionRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\Post;
 use Doctrine\DBAL\Types\Types;
+use ApiPlatform\Metadata\Delete;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\GetCollection;
+use App\Controller\IntroductionController;
+use App\Repository\IntroductionRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: IntroductionRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    operations: [
+        new Get(
+            uriTemplate: '/api/introduction/{id}',
+            controller: IntroductionController::class . '::getIntroduction',
+            normalizationContext: ['groups' => ['introduction:read']]
+        ),
+        new GetCollection(
+            uriTemplate: '/api/introduction',
+            controller: IntroductionController::class . '::getAllIntroductions',
+            normalizationContext: ['groups' => ['introduction:read']]
+        ),
+        new Post(
+            uriTemplate: '/api/introduction',
+            controller: IntroductionController::class . '::createIntroduction',
+            deserialize: false
+        ),
+        new Post(
+            uriTemplate: '/api/introduction/{id}',
+            controller: IntroductionController::class . '::updateIntroduction',
+            deserialize: false
+        ),
+        new Delete(
+            uriTemplate: '/api/introduction/{id}',
+            controller: IntroductionController::class . '::deleteIntroduction'
+        )
+    ],
+    formats: ['json', 'multipart' => ['multipart/form-data']]
+)]
 class Introduction
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['introduction:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['introduction:read'])]
     private ?string $title = null;
 
-
-
     /**
-     * @var Collection<int, images>
+     * @var Collection<int, Images>
      */
     #[ORM\OneToMany(targetEntity: Images::class, mappedBy: 'introduction')]
+    #[Groups(['introduction:read'])]
     private Collection $image;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['introduction:read'])]
     private ?string $description = null;
 
     public function __construct()
@@ -54,16 +91,15 @@ class Introduction
         return $this;
     }
 
-
     /**
-     * @return Collection<int, images>
+     * @return Collection<int, Images>
      */
     public function getImage(): Collection
     {
         return $this->image;
     }
 
-    public function addImage(images $image): static
+    public function addImage(Images $image): static
     {
         if (!$this->image->contains($image)) {
             $this->image->add($image);
@@ -73,7 +109,7 @@ class Introduction
         return $this;
     }
 
-    public function removeImage(images $image): static
+    public function removeImage(Images $image): static
     {
         if ($this->image->removeElement($image)) {
             // set the owning side to null (unless already changed)

@@ -13,6 +13,9 @@ security:
     dev:
       pattern: ^/(_(profiler|wdt)|css|images|js)/
       security: false
+    api_docs:
+      pattern: ^/api/docs
+      security: false
     introduction:
       pattern: ^/api/introduction
       security: false
@@ -33,6 +36,9 @@ security:
   access_control:
     # - { path: ^/admin, roles: ROLE_ADMIN }
     # - { path: ^/profile, roles: ROLE_USER }
+    - { path: ^/api/docs, roles: PUBLIC_ACCESS }
+    - { path: ^/api/docs.json, roles: PUBLIC_ACCESS }
+    - { path: ^/$, roles: PUBLIC_ACCESS } # Page d'accueil de l'API
     - { path: ^/api/introduction, roles: PUBLIC_ACCESS }
     - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 
