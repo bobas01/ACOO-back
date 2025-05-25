@@ -41,8 +41,10 @@ security:
     - { path: ^/$, roles: PUBLIC_ACCESS } # Page d'accueil de l'API
     - { path: ^/api/introduction, roles: PUBLIC_ACCESS }
     #ACCES CONTROL POUR LES QUESTIONS
-    # Autorise GET sur /api/questions sans authentification
+    # Autorise GET sur les routes concernées
     - { path: ^/api/questions, roles: PUBLIC_ACCESS, methods: [GET] }
+    - { path: ^/api/contact_clubs, roles: PUBLIC_ACCESS, methods: [GET] }
+
     # Règle générale pour le reste de l'API
     - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
     
