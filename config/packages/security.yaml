@@ -21,7 +21,7 @@ security:
       security: false
     main:
       lazy: true
-      provider: users_in_memory
+      provider: admin_provider
       stateless: true
       jwt: ~
 
