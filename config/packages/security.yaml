@@ -4,7 +4,7 @@ security:
     Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: "auto"
   # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
   providers:
-    users_in_memory: { memory: null }
+    # users_in_memory: { memory: null }
     admin_provider:
       entity:
         class: App\Entity\Admin
@@ -19,6 +19,16 @@ security:
     introduction:
       pattern: ^/api/introduction
       security: false
+    api_login:
+      pattern: ^/login
+      stateless: true
+      provider: admin_provider
+      # json_login:
+      #   check_path: /login
+      #   username_path: username
+      #   password_path: password
+      #   success_handler: lexik_jwt_authentication.handler.authentication_success
+      #   failure_handler: lexik_jwt_authentication.handler.authentication_failure
     main:
       lazy: true
       provider: admin_provider
@@ -36,6 +46,7 @@ security:
   access_control:
     # - { path: ^/admin, roles: ROLE_ADMIN }
     # - { path: ^/profile, roles: ROLE_USER }
+    - { path: ^/login, roles: PUBLIC_ACCESS, methods: [POST]}
     - { path: ^/api/docs, roles: PUBLIC_ACCESS }
     - { path: ^/api/docs.json, roles: PUBLIC_ACCESS }
     - { path: ^/$, roles: PUBLIC_ACCESS } # Page d'accueil de l'API

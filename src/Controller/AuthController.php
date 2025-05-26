@@ -26,6 +26,7 @@ class AuthController extends AbstractController
     #[Route('/login', name: 'app_login', methods: ['POST'])]
     public function login(Request $request, JWTTokenManagerInterface $JWTManager): Response
     {
+
         $data = json_decode($request->getContent(), true);
         $username = $data['username'];
         $password = $data['password'];
@@ -33,7 +34,8 @@ class AuthController extends AbstractController
         $admin = $this->entityManager->getRepository(Admin::class)->findOneBy(['username' => $username]);
 
         if (!$admin || !$this->passwordHasher->isPasswordValid($admin, $password)) {
-            throw new AuthenticationException('Invalid credentials.');
+            // throw new AuthenticationException('Identifiants invalides.');
+            return $this->json(['message' => 'Identifiants invalides.'], Response::HTTP_UNAUTHORIZED);
         }
 
         $token = $JWTManager->create($admin);
