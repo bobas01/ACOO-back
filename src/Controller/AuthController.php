@@ -40,10 +40,21 @@ class AuthController extends AbstractController
 
         $token = $JWTManager->create($admin);
 
-        return $this->json(['token' => $token,
+        // Récupère la durée de vie du token (en secondes)
+        $tokenTtl = $this->getParameter('lexik_jwt_authentication.token_ttl') ?? 3600;
+        $expiresAt = (new \DateTimeImmutable())->modify("+{$tokenTtl} seconds")->getTimestamp();
+        
+
+    
+
+        return $this->json([
             'username' => $admin->getUsername(),
             'email' => $admin->getEmail(),
-            'role' =>['ROLE_ADMIN']
+            'roles' =>['ROLE_ADMIN'],
+            'tokenData' => [
+                'expires_at' => $expiresAt,
+                'token' => $token,
+            ]
         ]);
     }
 } 
