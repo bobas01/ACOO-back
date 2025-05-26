@@ -18,6 +18,11 @@ class RegistrationController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
+        if (!$data || !isset($data['username'], $data['email'], $data['password'])) {
+            return $this->json(['error' => 'Données invalides. Should be username, email and password.'], Response::HTTP_BAD_REQUEST);
+        }
+
+
         $password = $data['password'];
         $passwordErrors = [];
 
