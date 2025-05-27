@@ -8,11 +8,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use App\Entity\Sports;
-use App\Entity\Teams;
-use App\Entity\News;
-use App\Entity\Images;
-
 
 #[ORM\Entity(repositoryClass: EventsRepository::class)]
 #[ApiResource]
@@ -36,40 +31,31 @@ class Events
     private ?string $location = null;
 
     #[ORM\Column]
-    private ?bool $is_cancelled = null;
+    private ?bool $isCancelled = null;
 
     #[ORM\Column]
-    private ?\DateTime $start_datetime = null;
+    private ?\DateTimeInterface $startDatetime = null;
 
     #[ORM\Column(nullable: true)]
-    private ?\DateTime $end_datetime = null;
+    private ?\DateTimeInterface $endDatetime = null;
 
     #[ORM\ManyToOne(inversedBy: 'events')]
-    private ?sports $id_sport = null;
+    private ?Sports $sport = null;
 
-    /**
-     * @var Collection<int, teams>
-     */
-    #[ORM\ManyToMany(targetEntity: teams::class, inversedBy: 'events')]
-    private Collection $id_team;
+    #[ORM\ManyToMany(targetEntity: Teams::class, inversedBy: 'events')]
+    private Collection $teams;
 
-    /**
-     * @var Collection<int, News>
-     */
-    #[ORM\OneToMany(targetEntity: News::class, mappedBy: 'id_event')]
+    #[ORM\OneToMany(targetEntity: News::class, mappedBy: 'event')]
     private Collection $news;
 
-    /**
-     * @var Collection<int, images>
-     */
-    #[ORM\OneToMany(targetEntity: Images::class, mappedBy: 'events')]
-    private Collection $image;
+    #[ORM\OneToMany(targetEntity: Images::class, mappedBy: 'event')]
+    private Collection $images;
 
     public function __construct()
     {
-        $this->id_team = new ArrayCollection();
+        $this->teams = new ArrayCollection();
         $this->news = new ArrayCollection();
-        $this->image = new ArrayCollection();
+        $this->images = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -85,7 +71,6 @@ class Events
     public function setTitle(string $title): static
     {
         $this->title = $title;
-
         return $this;
     }
 
@@ -97,7 +82,6 @@ class Events
     public function setContent(string $content): static
     {
         $this->content = $content;
-
         return $this;
     }
 
@@ -109,7 +93,6 @@ class Events
     public function setEventType(string $eventType): static
     {
         $this->eventType = $eventType;
-
         return $this;
     }
 
@@ -121,79 +104,72 @@ class Events
     public function setLocation(string $location): static
     {
         $this->location = $location;
-
         return $this;
     }
 
     public function isCancelled(): ?bool
     {
-        return $this->is_cancelled;
+        return $this->isCancelled;
     }
 
-    public function setIsCancelled(bool $is_cancelled): static
+    public function setIsCancelled(bool $isCancelled): static
     {
-        $this->is_cancelled = $is_cancelled;
-
+        $this->isCancelled = $isCancelled;
         return $this;
     }
 
-    public function getStartDatetime(): ?\DateTime
+    public function getStartDatetime(): ?\DateTimeInterface
     {
-        return $this->start_datetime;
+        return $this->startDatetime;
     }
 
-    public function setStartDatetime(\DateTime $start_datetime): static
+    public function setStartDatetime(\DateTimeInterface $startDatetime): static
     {
-        $this->start_datetime = $start_datetime;
-
+        $this->startDatetime = $startDatetime;
         return $this;
     }
 
-    public function getEndDatetime(): ?\DateTime
+    public function getEndDatetime(): ?\DateTimeInterface
     {
-        return $this->end_datetime;
+        return $this->endDatetime;
     }
 
-    public function setEndDatetime(?\DateTime $end_datetime): static
+    public function setEndDatetime(?\DateTimeInterface $endDatetime): static
     {
-        $this->end_datetime = $end_datetime;
-
+        $this->endDatetime = $endDatetime;
         return $this;
     }
 
-    public function getIdSport(): ?sports
+    public function getSport(): ?Sports
     {
-        return $this->id_sport;
+        return $this->sport;
     }
 
-    public function setIdSport(?sports $id_sport): static
+    public function setSport(?Sports $sport): static
     {
-        $this->id_sport = $id_sport;
-
+        $this->sport = $sport;
         return $this;
     }
 
     /**
-     * @return Collection<int, teams>
+     * @return Collection<int, Teams>
      */
-    public function getIdTeam(): Collection
+    public function getTeams(): Collection
     {
-        return $this->id_team;
+        return $this->teams;
     }
 
-    public function addIdTeam(teams $idTeam): static
+    public function addTeam(Teams $team): static
     {
-        if (!$this->id_team->contains($idTeam)) {
-            $this->id_team->add($idTeam);
+        if (!$this->teams->contains($team)) {
+            $this->teams->add($team);
         }
-
         return $this;
     }
 
-    public function removeIdTeam(teams $idTeam): static
+    public function removeTeam(Teams $team): static
     {
-        $this->id_team->removeElement($idTeam);
-
+        $this->teams->removeElement($team);
         return $this;
     }
 
@@ -209,51 +185,45 @@ class Events
     {
         if (!$this->news->contains($news)) {
             $this->news->add($news);
-            $news->setIdEvent($this);
+            $news->setEvent($this);
         }
-
         return $this;
     }
 
     public function removeNews(News $news): static
     {
         if ($this->news->removeElement($news)) {
-            // set the owning side to null (unless already changed)
-            if ($news->getIdEvent() === $this) {
-                $news->setIdEvent(null);
+            if ($news->getEvent() === $this) {
+                $news->setEvent(null);
             }
         }
-
         return $this;
     }
 
     /**
-     * @return Collection<int, images>
+     * @return Collection<int, Images>
      */
-    public function getImage(): Collection
+    public function getImages(): Collection
     {
-        return $this->image;
+        return $this->images;
     }
 
-    public function addImage(images $image): static
+    public function addImage(Images $image): static
     {
-        if (!$this->image->contains($image)) {
-            $this->image->add($image);
+        if (!$this->images->contains($image)) {
+            $this->images->add($image);
             $image->setEvents($this);
         }
-
         return $this;
     }
 
-    public function removeImage(images $image): static
+    public function removeImage(Images $image): static
     {
-        if ($this->image->removeElement($image)) {
-            // set the owning side to null (unless already changed)
+        if ($this->images->removeElement($image)) {
             if ($image->getEvents() === $this) {
                 $image->setEvents(null);
             }
         }
-
         return $this;
     }
 }
