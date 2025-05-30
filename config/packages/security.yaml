@@ -19,16 +19,6 @@ security:
     introduction:
       pattern: ^/api/introduction
       security: false
-    api_login:
-      pattern: ^/login
-      stateless: true
-      provider: admin_provider
-      # json_login:
-      #   check_path: /login
-      #   username_path: username
-      #   password_path: password
-      #   success_handler: lexik_jwt_authentication.handler.authentication_success
-      #   failure_handler: lexik_jwt_authentication.handler.authentication_failure
     main:
       lazy: true
       provider: admin_provider
@@ -46,15 +36,14 @@ security:
   access_control:
     # - { path: ^/admin, roles: ROLE_ADMIN }
     # - { path: ^/profile, roles: ROLE_USER }
-    - { path: ^/login, roles: PUBLIC_ACCESS, methods: [POST]}
+    - { path: ^/api/login, roles: PUBLIC_ACCESS, methods: [POST]}
     - { path: ^/api/docs, roles: PUBLIC_ACCESS }
     - { path: ^/api/docs.json, roles: PUBLIC_ACCESS }
     - { path: ^/$, roles: PUBLIC_ACCESS } # Page d'accueil de l'API
-    - { path: ^/api/introduction, roles: PUBLIC_ACCESS }
-    #ACCES CONTROL POUR LES QUESTIONS
     # Autorise GET sur les routes concernées
     - { path: ^/api/questions, roles: PUBLIC_ACCESS, methods: [GET] }
     - { path: ^/api/contact_clubs, roles: PUBLIC_ACCESS, methods: [GET] }
+    - { path: ^/api/introduction, roles: PUBLIC_ACCESS, methods: [GET] }
 
     # Règle générale pour le reste de l'API
     - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }

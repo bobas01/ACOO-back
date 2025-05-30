@@ -23,7 +23,7 @@ class AuthController extends AbstractController
         $this->passwordHasher = $passwordHasher;
     }
 
-    #[Route('/login', name: 'app_login', methods: ['POST'])]
+    #[Route('/api/login', name: 'app_login', methods: ['POST'])]
     public function login(Request $request, JWTTokenManagerInterface $JWTManager): Response
     {
 
