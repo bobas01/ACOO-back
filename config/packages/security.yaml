@@ -44,6 +44,7 @@ security:
     - { path: ^/api/questions, roles: PUBLIC_ACCESS, methods: [GET] }
     - { path: ^/api/contact_clubs, roles: PUBLIC_ACCESS, methods: [GET] }
     - { path: ^/api/introduction, roles: PUBLIC_ACCESS, methods: [GET] }
+    - { path: ^/api/social_medias, roles: PUBLIC_ACCESS, methods: [GET] }
 
     # Règle générale pour le reste de l'API
     - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
