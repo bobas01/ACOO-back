@@ -24,6 +24,7 @@ class ContactClub
     #[ORM\Column(length: 12)]
     private ?string $phoneNumber = null;
 
+
     public function getId(): ?int
     {
         return $this->id;
@@ -64,4 +65,5 @@ class ContactClub
 
         return $this;
     }
+
 }

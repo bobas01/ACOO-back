@@ -24,3 +24,4 @@
 
 /public/uploads/images/*
 !/public/uploads/images/.gitkeep
+.env.local.php

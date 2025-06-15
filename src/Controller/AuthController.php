@@ -23,9 +23,10 @@ class AuthController extends AbstractController
         $this->passwordHasher = $passwordHasher;
     }
 
-    #[Route('/login', name: 'app_login', methods: ['POST'])]
+    #[Route('/api/login', name: 'app_login', methods: ['POST'])]
     public function login(Request $request, JWTTokenManagerInterface $JWTManager): Response
     {
+
         $data = json_decode($request->getContent(), true);
         $username = $data['username'];
         $password = $data['password'];
@@ -33,14 +34,27 @@ class AuthController extends AbstractController
         $admin = $this->entityManager->getRepository(Admin::class)->findOneBy(['username' => $username]);
 
         if (!$admin || !$this->passwordHasher->isPasswordValid($admin, $password)) {
-            throw new AuthenticationException('Invalid credentials.');
+            // throw new AuthenticationException('Identifiants invalides.');
+            return $this->json(['message' => 'Identifiants invalides.'], Response::HTTP_UNAUTHORIZED);
         }
 
         $token = $JWTManager->create($admin);
 
-        return $this->json(['token' => $token,
+        // Récupère la durée de vie du token (en secondes)
+        $tokenTtl = $this->getParameter('lexik_jwt_authentication.token_ttl') ?? 3600;
+        $expiresAt = (new \DateTimeImmutable())->modify("+{$tokenTtl} seconds")->getTimestamp();
+        
+
+    
+
+        return $this->json([
             'username' => $admin->getUsername(),
             'email' => $admin->getEmail(),
+            'roles' =>['ROLE_ADMIN'],
+            'tokenData' => [
+                'expires_at' => $expiresAt,
+                'token' => $token,
+            ]
         ]);
     }
 } 
