@@ -8,50 +8,99 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Delete;
+use App\Controller\RecurringScheduleController;
+use Symfony\Component\Serializer\Annotation\Groups;
+
+
 
 #[ORM\Entity(repositoryClass: RecurringScheduleRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    operations: [
+        new Get(
+            uriTemplate: '/recurring-schedules/{id}',
+            controller: RecurringScheduleController::class . '::getRecurringSchedule',
+            normalizationContext: ['groups' => ['recurring_schedule:read']]
+        ),
+        new GetCollection(
+            uriTemplate: '/recurring-schedules',
+            controller: RecurringScheduleController::class . '::getAllRecurringSchedules',
+            normalizationContext: ['groups' => ['recurring_schedule:read']]
+        ),
+        new Post(
+            uriTemplate: '/recurring-schedules',
+            controller: RecurringScheduleController::class . '::createRecurringSchedule',
+            deserialize: false,
+            denormalizationContext: ['groups' => ['recurring_schedule:write']]
+        ),
+        new Post(
+            uriTemplate: '/recurring-schedules/{id}',
+            controller: RecurringScheduleController::class . '::updateRecurringSchedule',
+            deserialize: false,
+            denormalizationContext: ['groups' => ['recurring_schedule:write']]
+        ),
+        new Delete(
+            uriTemplate: '/recurring-schedules/{id}',
+            controller: RecurringScheduleController::class . '::deleteRecurringSchedule'
+        )
+    ],
+    formats: ['json', 'multipart' => ['multipart/form-data']]
+)]
 class RecurringSchedule
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['recurring_schedule:read'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'recurringSchedules')]
-    private ?sports $id_sport = null;
+    #[Groups(['recurring_schedule:read', 'recurring_schedule:write'])]
+    private ?Sports $sport = null;
 
     #[ORM\ManyToOne(inversedBy: 'recurringSchedules')]
-    private ?teams $id_team = null;
+    #[Groups(['recurring_schedule:read', 'recurring_schedule:write'])]
+    private ?Teams $team = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['recurring_schedule:read', 'recurring_schedule:write'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Groups(['recurring_schedule:read', 'recurring_schedule:write'])]
     private ?string $description = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['recurring_schedule:read', 'recurring_schedule:write'])]
     private ?string $location = null;
 
     #[ORM\Column]
+    #[Groups(['recurring_schedule:read', 'recurring_schedule:write'])]
     private ?\DateTime $start_time = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['recurring_schedule:read', 'recurring_schedule:write'])]
     private ?int $duration = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['recurring_schedule:read', 'recurring_schedule:write'])]
     private ?string $frequency = null;
 
     #[ORM\Column]
+    #[Groups(['recurring_schedule:read', 'recurring_schedule:write'])]
     private ?\DateTime $end_date = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['recurring_schedule:read', 'recurring_schedule:write'])]
     private ?string $day_of_week = null;
 
     /**
      * @var Collection<int, ScheduleExeption>
      */
-    #[ORM\OneToMany(targetEntity: ScheduleExeption::class, mappedBy: 'id_reccuring_schedule')]
+    #[ORM\OneToMany(targetEntity: ScheduleExeption::class, mappedBy: 'recurring_schedule')]
     private Collection $scheduleExeptions;
 
     public function __construct()
@@ -64,27 +113,25 @@ class RecurringSchedule
         return $this->id;
     }
 
-    public function getIdSport(): ?sports
+    public function getSport(): ?Sports
     {
-        return $this->id_sport;
+        return $this->sport;
     }
 
-    public function setIdSport(?sports $id_sport): static
+    public function setSport(?Sports $sport): static
     {
-        $this->id_sport = $id_sport;
-
+        $this->sport = $sport;
         return $this;
     }
 
-    public function getIdTeam(): ?teams
+    public function getTeam(): ?Teams
     {
-        return $this->id_team;
+        return $this->team;
     }
 
-    public function setIdTeam(?teams $id_team): static
+    public function setTeam(?Teams $team): static
     {
-        $this->id_team = $id_team;
-
+        $this->team = $team;
         return $this;
     }
 
@@ -96,7 +143,6 @@ class RecurringSchedule
     public function setTitle(string $title): static
     {
         $this->title = $title;
-
         return $this;
     }
 
@@ -108,7 +154,6 @@ class RecurringSchedule
     public function setDescription(string $description): static
     {
         $this->description = $description;
-
         return $this;
     }
 
@@ -120,7 +165,6 @@ class RecurringSchedule
     public function setLocation(string $location): static
     {
         $this->location = $location;
-
         return $this;
     }
 
@@ -132,7 +176,6 @@ class RecurringSchedule
     public function setStartTime(\DateTime $start_time): static
     {
         $this->start_time = $start_time;
-
         return $this;
     }
 
@@ -144,7 +187,6 @@ class RecurringSchedule
     public function setDuration(?int $duration): static
     {
         $this->duration = $duration;
-
         return $this;
     }
 
@@ -156,7 +198,6 @@ class RecurringSchedule
     public function setFrequency(?string $frequency): static
     {
         $this->frequency = $frequency;
-
         return $this;
     }
 
@@ -168,7 +209,6 @@ class RecurringSchedule
     public function setEndDate(\DateTime $end_date): static
     {
         $this->end_date = $end_date;
-
         return $this;
     }
 
@@ -180,7 +220,6 @@ class RecurringSchedule
     public function setDayOfWeek(string $day_of_week): static
     {
         $this->day_of_week = $day_of_week;
-
         return $this;
     }
 
@@ -196,21 +235,18 @@ class RecurringSchedule
     {
         if (!$this->scheduleExeptions->contains($scheduleExeption)) {
             $this->scheduleExeptions->add($scheduleExeption);
-            $scheduleExeption->setIdReccuringSchedule($this);
+            $scheduleExeption->setRecurringSchedule($this);
         }
-
         return $this;
     }
 
     public function removeScheduleExeption(ScheduleExeption $scheduleExeption): static
     {
         if ($this->scheduleExeptions->removeElement($scheduleExeption)) {
-            // set the owning side to null (unless already changed)
-            if ($scheduleExeption->getIdReccuringSchedule() === $this) {
-                $scheduleExeption->setIdReccuringSchedule(null);
+            if ($scheduleExeption->getRecurringSchedule() === $this) {
+                $scheduleExeption->setRecurringSchedule(null);
             }
         }
-
         return $this;
     }
 }
