@@ -9,9 +9,45 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\Admin;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Delete;
+use App\Controller\NewsController;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: NewsRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    operations: [
+        new Get(
+            uriTemplate: '/news/{id}',
+            controller: NewsController::class . '::getNews',
+            normalizationContext: ['groups' => ['news:read']]
+        ),
+        new GetCollection(
+            uriTemplate: '/news',
+            controller: NewsController::class . '::getAllNews',
+            normalizationContext: ['groups' => ['news:read']]
+        ),
+        new Post(
+            uriTemplate: '/news',
+            controller: NewsController::class . '::createNews',
+            deserialize: false,
+            denormalizationContext: ['groups' => ['news:write']]
+        ),
+        new Post(
+            uriTemplate: '/news/{id}',
+            controller: NewsController::class . '::updateNews',
+            deserialize: false,
+            denormalizationContext: ['groups' => ['news:write']]
+        ),
+        new Delete(
+            uriTemplate: '/news/{id}',
+            controller: NewsController::class . '::deleteNews'
+        )
+    ],
+    formats: ['json', 'multipart' => ['multipart/form-data']]
+)]
 class News
 {
     #[ORM\Id]
@@ -20,21 +56,27 @@ class News
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['news:read', 'news:write'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Groups(['news:read', 'news:write'])]
     private ?string $description = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['news:read', 'news:write'])]
     private ?string $imgUrl = null;
 
     #[ORM\ManyToOne(targetEntity: Events::class, inversedBy: 'news')]
+    #[Groups(['news:read', 'news:write'])]
     private ?Events $event = null;
 
     #[ORM\Column]
+    #[Groups(['news:read', 'news:write'])]
     private ?\DateTimeImmutable $created_at = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['news:read', 'news:write'])]
     private ?\DateTimeImmutable $updated_at = null;
 
     #[ORM\ManyToOne(inversedBy: 'news')]
