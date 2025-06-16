@@ -20,27 +20,29 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ApiResource(
     operations: [
         new Get(
-            uriTemplate: '/api/introduction/{id}',
+            uriTemplate: '/introduction/{id}',
             controller: IntroductionController::class . '::getIntroduction',
             normalizationContext: ['groups' => ['introduction:read']]
         ),
         new GetCollection(
-            uriTemplate: '/api/introduction',
+            uriTemplate: '/introduction',
             controller: IntroductionController::class . '::getAllIntroductions',
             normalizationContext: ['groups' => ['introduction:read']]
         ),
         new Post(
-            uriTemplate: '/api/introduction',
+            uriTemplate: '/introduction',
             controller: IntroductionController::class . '::createIntroduction',
-            deserialize: false
+            deserialize: false,
+            denormalizationContext: ['groups' => ['introduction:write']]
         ),
         new Post(
-            uriTemplate: '/api/introduction/{id}',
+            uriTemplate: '/introduction/{id}',
             controller: IntroductionController::class . '::updateIntroduction',
-            deserialize: false
+            deserialize: false,
+            denormalizationContext: ['groups' => ['introduction:write']]
         ),
         new Delete(
-            uriTemplate: '/api/introduction/{id}',
+            uriTemplate: '/introduction/{id}',
             controller: IntroductionController::class . '::deleteIntroduction'
         )
     ],
@@ -55,7 +57,7 @@ class Introduction
     private ?int $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['introduction:read'])]
+    #[Groups(['introduction:read', 'introduction:write'])]
     private ?string $title = null;
 
     /**
@@ -66,7 +68,7 @@ class Introduction
     private Collection $image;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['introduction:read'])]
+    #[Groups(['introduction:read', 'introduction:write'])]
     private ?string $description = null;
 
     public function __construct()

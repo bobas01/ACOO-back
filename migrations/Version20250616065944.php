@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20250523125704 extends AbstractMigration
+final class Version20250616065944 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -30,7 +30,7 @@ final class Version20250523125704 extends AbstractMigration
             CREATE TABLE contact_club (id INT AUTO_INCREMENT NOT NULL, mail VARCHAR(255) NOT NULL, address VARCHAR(255) NOT NULL, phone_number VARCHAR(12) NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
         SQL);
         $this->addSql(<<<'SQL'
-            CREATE TABLE events (id INT AUTO_INCREMENT NOT NULL, id_sport_id INT DEFAULT NULL, title VARCHAR(255) NOT NULL, content LONGTEXT NOT NULL, event_type VARCHAR(255) NOT NULL, location VARCHAR(255) NOT NULL, is_cancelled TINYINT(1) NOT NULL, start_datetime DATETIME NOT NULL, end_datetime DATETIME DEFAULT NULL, INDEX IDX_5387574AFCA3506D (id_sport_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
+            CREATE TABLE events (id INT AUTO_INCREMENT NOT NULL, sport_id INT DEFAULT NULL, title VARCHAR(255) NOT NULL, content LONGTEXT NOT NULL, event_type VARCHAR(255) NOT NULL, location VARCHAR(255) NOT NULL, is_cancelled TINYINT(1) NOT NULL, start_datetime VARCHAR(255) NOT NULL, end_datetime VARCHAR(255) DEFAULT NULL, INDEX IDX_5387574AAC78BCF8 (sport_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
         SQL);
         $this->addSql(<<<'SQL'
             CREATE TABLE events_teams (events_id INT NOT NULL, teams_id INT NOT NULL, INDEX IDX_267EEA7E9D6A1065 (events_id), INDEX IDX_267EEA7ED6365F12 (teams_id), PRIMARY KEY(events_id, teams_id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
@@ -72,10 +72,10 @@ final class Version20250523125704 extends AbstractMigration
             CREATE TABLE sports (id INT AUTO_INCREMENT NOT NULL, name VARCHAR(255) NOT NULL, description LONGTEXT NOT NULL, contact VARCHAR(255) DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
         SQL);
         $this->addSql(<<<'SQL'
-            CREATE TABLE teams (id INT AUTO_INCREMENT NOT NULL, id_sport_id INT DEFAULT NULL, name VARCHAR(255) NOT NULL, INDEX IDX_96C22258FCA3506D (id_sport_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
+            CREATE TABLE teams (id INT AUTO_INCREMENT NOT NULL, id_sport_id INT DEFAULT NULL, name VARCHAR(255) NOT NULL, role VARCHAR(255) NOT NULL, INDEX IDX_96C22258FCA3506D (id_sport_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
         SQL);
         $this->addSql(<<<'SQL'
-            ALTER TABLE events ADD CONSTRAINT FK_5387574AFCA3506D FOREIGN KEY (id_sport_id) REFERENCES sports (id)
+            ALTER TABLE events ADD CONSTRAINT FK_5387574AAC78BCF8 FOREIGN KEY (sport_id) REFERENCES sports (id)
         SQL);
         $this->addSql(<<<'SQL'
             ALTER TABLE events_teams ADD CONSTRAINT FK_267EEA7E9D6A1065 FOREIGN KEY (events_id) REFERENCES events (id) ON DELETE CASCADE
@@ -134,7 +134,7 @@ final class Version20250523125704 extends AbstractMigration
     {
         // this down() migration is auto-generated, please modify it to your needs
         $this->addSql(<<<'SQL'
-            ALTER TABLE events DROP FOREIGN KEY FK_5387574AFCA3506D
+            ALTER TABLE events DROP FOREIGN KEY FK_5387574AAC78BCF8
         SQL);
         $this->addSql(<<<'SQL'
             ALTER TABLE events_teams DROP FOREIGN KEY FK_267EEA7E9D6A1065

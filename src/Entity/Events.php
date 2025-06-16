@@ -8,47 +8,94 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Delete;
+use App\Controller\EventsController;
 
 #[ORM\Entity(repositoryClass: EventsRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    operations: [
+        new Get(
+            uriTemplate: '/events/{id}',
+            controller: EventsController::class . '::show',
+            normalizationContext: ['groups' => ['events:read']]
+        ),
+        new GetCollection(
+            uriTemplate: '/events',
+            controller: EventsController::class . '::index',
+            normalizationContext: ['groups' => ['events:read']]
+        ),
+        new Post(
+            uriTemplate: '/events',
+            controller: EventsController::class . '::create',
+            deserialize: false,
+            denormalizationContext: ['groups' => ['events:write']]
+        ),
+        new Post(
+            uriTemplate: '/events/{id}',
+            controller: EventsController::class . '::update',
+            deserialize: false,
+            denormalizationContext: ['groups' => ['events:write']]
+        ),
+        new Delete(
+            uriTemplate: '/events/{id}',
+            controller: EventsController::class . '::delete'
+        )
+    ],
+    formats: ['json', 'multipart' => ['multipart/form-data']]
+)]
 class Events
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['events:read', 'events:write'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['events:read', 'events:write'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Groups(['events:read', 'events:write'])]
     private ?string $content = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['events:read', 'events:write'])]
     private ?string $eventType = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['events:read', 'events:write'])]
     private ?string $location = null;
 
     #[ORM\Column]
+    #[Groups(['events:read', 'events:write'])]
     private ?bool $isCancelled = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(['events:read', 'events:write'])]
     private ?\DateTimeInterface $startDatetime = null;
 
-    #[ORM\Column(nullable: true)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[Groups(['events:read', 'events:write'])]
     private ?\DateTimeInterface $endDatetime = null;
 
     #[ORM\ManyToOne(inversedBy: 'events')]
+    #[Groups(['events:read', 'events:write'])]
     private ?Sports $sport = null;
 
     #[ORM\ManyToMany(targetEntity: Teams::class, inversedBy: 'events')]
+    #[Groups(['events:read', 'events:write'])]
     private Collection $teams;
 
     #[ORM\OneToMany(targetEntity: News::class, mappedBy: 'event')]
     private Collection $news;
 
     #[ORM\OneToMany(targetEntity: Images::class, mappedBy: 'event')]
+    #[Groups(['events:read', 'events:write'])]
     private Collection $images;
 
     public function __construct()

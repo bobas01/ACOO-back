@@ -13,17 +13,24 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class IntroductionController extends AbstractController
 {
-    #[Route('/api/introduction', name: 'create_introduction', methods: ['POST'])]
+    #[Route('/introduction', name: 'create_introduction', methods: ['POST'])]
     public function createIntroduction(
         Request $request,
         EntityManagerInterface $entityManager,
         ImageUploadService $imageUploadService
     ): Response {
         try {
-            // Récupérer les données du formulaire
-            $title = $request->request->get('title');
-            $description = $request->request->get('description');
-            $imageFile = $request->files->get('image');
+            $data = json_decode($request->getContent(), true);
+            
+            if (!$data) {
+                return $this->json([
+                    'error' => 'Invalid JSON data'
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            $title = $data['title'] ?? null;
+            $description = $data['description'] ?? null;
+            $images = $data['images'] ?? [];
 
             if (!$title || !$description) {
                 return $this->json([
@@ -31,24 +38,40 @@ class IntroductionController extends AbstractController
                 ], Response::HTTP_BAD_REQUEST);
             }
 
-
             $introduction = new Introduction();
             $introduction->setTitle($title);
             $introduction->setDescription($description);
 
             $entityManager->persist($introduction);
 
-            $imageUrl = null;
-            if ($imageFile) {
-                $imagePath = $imageUploadService->upload($imageFile, 'introduction');
+            $imageUrls = [];
+            foreach ($images as $base64Image) {
+                if (strpos($base64Image, 'data:image') === 0) {
+                    $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64Image));
+                    $tempFile = tempnam(sys_get_temp_dir(), 'img_');
+                    file_put_contents($tempFile, $imageData);
+                    
+                    $mimeType = mime_content_type($tempFile);
+                    $extension = explode('/', $mimeType)[1];
+                    
+                    $imageFile = new \Symfony\Component\HttpFoundation\File\UploadedFile(
+                        $tempFile,
+                        'image.' . $extension,
+                        $mimeType,
+                        null,
+                        true
+                    );
 
-                $image = new Images();
-                $image->setUrl($imagePath);
-                $image->setIntroduction($introduction);
+                    $imagePath = $imageUploadService->upload($imageFile, 'introduction');
 
-                $entityManager->persist($image);
+                    $image = new Images();
+                    $image->setUrl($imagePath);
+                    $image->setIntroduction($introduction);
 
-                $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $imagePath;
+                    $entityManager->persist($image);
+
+                    $imageUrls[] = $request->getSchemeAndHttpHost() . '/uploads/images/' . $imagePath;
+                }
             }
 
             $entityManager->flush();
@@ -59,7 +82,7 @@ class IntroductionController extends AbstractController
                     'id' => $introduction->getId(),
                     'title' => $introduction->getTitle(),
                     'description' => $introduction->getDescription(),
-                    'image' => $imageUrl
+                    'images' => $imageUrls
                 ]
             ], Response::HTTP_CREATED);
         } catch (\Exception $e) {
@@ -69,7 +92,7 @@ class IntroductionController extends AbstractController
         }
     }
 
-    #[Route('/api/introduction/{id}', name: 'update_introduction', methods: ['POST'])]
+    #[Route('/introduction/{id}', name: 'update_introduction', methods: ['POST'])]
     public function updateIntroduction(
         int $id,
         Request $request,
@@ -85,9 +108,17 @@ class IntroductionController extends AbstractController
                 ], Response::HTTP_NOT_FOUND);
             }
 
-            // Mise à jour du titre et de la description s'ils sont fournis
-            $title = $request->request->get('title');
-            $description = $request->request->get('description');
+            $data = json_decode($request->getContent(), true);
+            
+            if (!$data) {
+                return $this->json([
+                    'error' => 'Invalid JSON data'
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            $title = $data['title'] ?? null;
+            $description = $data['description'] ?? null;
+            $images = $data['images'] ?? [];
 
             if ($title) {
                 $introduction->setTitle($title);
@@ -96,35 +127,44 @@ class IntroductionController extends AbstractController
                 $introduction->setDescription($description);
             }
 
-            // Gestion de la nouvelle image si elle est fournie
-            $imageFile = $request->files->get('image');
-            $imageUrl = null;
-
-            if ($imageFile) {
-                // Supprimer l'ancienne image si elle existe
-                $oldImages = $introduction->getImage();
-                foreach ($oldImages as $oldImage) {
-                    $oldPath = $this->getParameter('images_directory') . '/' . $oldImage->getUrl();
-                    if (file_exists($oldPath)) {
-                        unlink($oldPath);
-                    }
-                    $entityManager->remove($oldImage);
+            // Supprimer les anciennes images
+            $oldImages = $introduction->getImage();
+            foreach ($oldImages as $oldImage) {
+                $oldPath = $this->getParameter('images_directory') . '/' . $oldImage->getUrl();
+                if (file_exists($oldPath)) {
+                    unlink($oldPath);
                 }
+                $entityManager->remove($oldImage);
+            }
 
-                // Upload de la nouvelle image
-                $imagePath = $imageUploadService->upload($imageFile, 'introduction');
+            // Traiter les nouvelles images
+            $imageUrls = [];
+            foreach ($images as $base64Image) {
+                if (strpos($base64Image, 'data:image') === 0) {
+                    $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64Image));
+                    $tempFile = tempnam(sys_get_temp_dir(), 'img_');
+                    file_put_contents($tempFile, $imageData);
+                    
+                    $mimeType = mime_content_type($tempFile);
+                    $extension = explode('/', $mimeType)[1];
+                    
+                    $imageFile = new \Symfony\Component\HttpFoundation\File\UploadedFile(
+                        $tempFile,
+                        'image.' . $extension,
+                        $mimeType,
+                        null,
+                        true
+                    );
 
-                $image = new Images();
-                $image->setUrl($imagePath);
-                $image->setIntroduction($introduction);
+                    $imagePath = $imageUploadService->upload($imageFile, 'introduction');
 
-                $entityManager->persist($image);
-                $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $imagePath;
-            } else {
-                // Récupérer l'URL de l'image existante si elle existe
-                $existingImage = $introduction->getImage()->first();
-                if ($existingImage) {
-                    $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $existingImage->getUrl();
+                    $image = new Images();
+                    $image->setUrl($imagePath);
+                    $image->setIntroduction($introduction);
+
+                    $entityManager->persist($image);
+
+                    $imageUrls[] = $request->getSchemeAndHttpHost() . '/uploads/images/' . $imagePath;
                 }
             }
 
@@ -136,7 +176,7 @@ class IntroductionController extends AbstractController
                     'id' => $introduction->getId(),
                     'title' => $introduction->getTitle(),
                     'description' => $introduction->getDescription(),
-                    'image' => $imageUrl
+                    'images' => $imageUrls
                 ]
             ], Response::HTTP_OK);
         } catch (\Exception $e) {
@@ -146,7 +186,7 @@ class IntroductionController extends AbstractController
         }
     }
 
-    #[Route('/api/introduction/{id}', name: 'delete_introduction', methods: ['DELETE'])]
+    #[Route('/introduction/{id}', name: 'delete_introduction', methods: ['DELETE'])]
     public function deleteIntroduction(
         int $id,
         EntityManagerInterface $entityManager
@@ -184,7 +224,7 @@ class IntroductionController extends AbstractController
         }
     }
 
-    #[Route('/api/introduction/{id}', name: 'get_introduction', methods: ['GET'])]
+    #[Route('/introduction/{id}', name: 'get_introduction', methods: ['GET'])]
     public function getIntroduction(
         int $id,
         EntityManagerInterface $entityManager,
@@ -221,7 +261,7 @@ class IntroductionController extends AbstractController
         }
     }
 
-    #[Route('/api/introduction', name: 'get_all_introductions', methods: ['GET'])]
+    #[Route('/introduction', name: 'get_all_introductions', methods: ['GET'])]
     public function getAllIntroductions(
         EntityManagerInterface $entityManager,
         Request $request
