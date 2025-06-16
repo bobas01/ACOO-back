@@ -156,7 +156,7 @@ class Sports
     {
         if (!$this->teams->contains($team)) {
             $this->teams->add($team);
-            $team->setIdSport($this);
+            $team->setSport($this);
         }
 
         return $this;
@@ -165,9 +165,9 @@ class Sports
     public function removeTeam(Teams $team): static
     {
         if ($this->teams->removeElement($team)) {
-            // set the owning side to null (unless already changed)
-            if ($team->getIdSport() === $this) {
-                $team->setIdSport(null);
+            
+            if ($team->getSport() === $this) {
+                $team->setSport(null);
             }
         }
 
@@ -216,7 +216,7 @@ class Sports
     {
         if (!$this->recurringSchedules->contains($recurringSchedule)) {
             $this->recurringSchedules->add($recurringSchedule);
-            $recurringSchedule->setIdSport($this);
+            $recurringSchedule->setSport($this);
         }
 
         return $this;
@@ -226,8 +226,8 @@ class Sports
     {
         if ($this->recurringSchedules->removeElement($recurringSchedule)) {
             // set the owning side to null (unless already changed)
-            if ($recurringSchedule->getIdSport() === $this) {
-                $recurringSchedule->setIdSport(null);
+            if ($recurringSchedule->getSport() === $this) {
+                $recurringSchedule->setSport(null);
             }
         }
 

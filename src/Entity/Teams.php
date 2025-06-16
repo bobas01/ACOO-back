@@ -3,39 +3,81 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Delete;
+use App\Controller\TeamsController;
 use App\Repository\TeamsRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: TeamsRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    operations: [
+        new Get(
+            uriTemplate: '/teams/{id}',
+            controller: TeamsController::class . '::show',
+            normalizationContext: ['groups' => ['teams:read']]
+        ),
+        new GetCollection(
+            uriTemplate: '/teams',
+            controller: TeamsController::class . '::index',
+            normalizationContext: ['groups' => ['teams:read']]
+        ),
+        new Post(
+            uriTemplate: '/teams',
+            controller: TeamsController::class . '::create',
+            deserialize: false,
+            denormalizationContext: ['groups' => ['teams:write']]
+        ),
+        new Post(
+            uriTemplate: '/teams/{id}',
+            controller: TeamsController::class . '::update',
+            deserialize: false,
+            denormalizationContext: ['groups' => ['teams:write']]
+        ),
+        new Delete(
+            uriTemplate: '/teams/{id}',
+            controller: TeamsController::class . '::delete'
+        )
+    ],
+    formats: ['json', 'multipart' => ['multipart/form-data']]
+)]
 class Teams
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['teams:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['teams:read', 'teams:write'])]
     private ?string $name = null;
 
     #[ORM\ManyToOne(inversedBy: 'teams')]
-    private ?sports $id_sport = null;
+    #[Groups(['teams:read', 'teams:write'])]
+    private ?Sports $sport = null;
 
     /**
      * @var Collection<int, Events>
      */
-    #[ORM\ManyToMany(targetEntity: Events::class, mappedBy: 'id_team')]
+    #[ORM\ManyToMany(targetEntity: Events::class, mappedBy: 'teams')]
+    #[Groups(['teams:read'])]
     private Collection $events;
 
     /**
      * @var Collection<int, RecurringSchedule>
      */
-    #[ORM\OneToMany(targetEntity: RecurringSchedule::class, mappedBy: 'id_team')]
+    #[ORM\OneToMany(targetEntity: RecurringSchedule::class, mappedBy: 'team')]
+    #[Groups(['teams:read'])]
     private Collection $recurringSchedules;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['teams:read', 'teams:write'])]
     private ?string $role = null;
 
     public function __construct()
@@ -57,19 +99,17 @@ class Teams
     public function setName(string $name): static
     {
         $this->name = $name;
-
         return $this;
     }
 
-    public function getIdSport(): ?sports
+    public function getSport(): ?Sports
     {
-        return $this->id_sport;
+        return $this->sport;
     }
 
-    public function setIdSport(?sports $id_sport): static
+    public function setSport(?Sports $sport): static
     {
-        $this->id_sport = $id_sport;
-
+        $this->sport = $sport;
         return $this;
     }
 
@@ -85,18 +125,16 @@ class Teams
     {
         if (!$this->events->contains($event)) {
             $this->events->add($event);
-            $event->addIdTeam($this);
+            $event->addTeam($this);
         }
-
         return $this;
     }
 
     public function removeEvent(Events $event): static
     {
         if ($this->events->removeElement($event)) {
-            $event->removeIdTeam($this);
+            $event->removeTeam($this);
         }
-
         return $this;
     }
 
@@ -112,21 +150,18 @@ class Teams
     {
         if (!$this->recurringSchedules->contains($recurringSchedule)) {
             $this->recurringSchedules->add($recurringSchedule);
-            $recurringSchedule->setIdTeam($this);
+            $recurringSchedule->setTeam($this);
         }
-
         return $this;
     }
 
     public function removeRecurringSchedule(RecurringSchedule $recurringSchedule): static
     {
         if ($this->recurringSchedules->removeElement($recurringSchedule)) {
-            // set the owning side to null (unless already changed)
-            if ($recurringSchedule->getIdTeam() === $this) {
-                $recurringSchedule->setIdTeam(null);
+            if ($recurringSchedule->getTeam() === $this) {
+                $recurringSchedule->setTeam(null);
             }
         }
-
         return $this;
     }
 
@@ -138,7 +173,6 @@ class Teams
     public function setRole(string $role): static
     {
         $this->role = $role;
-
         return $this;
     }
 }
