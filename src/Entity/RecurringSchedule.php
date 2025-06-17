@@ -14,6 +14,9 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Delete;
 use App\Controller\RecurringScheduleController;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\SerializedName;
+use Symfony\Component\Serializer\Annotation\Type;
+use ApiPlatform\Metadata\ApiProperty;
 
 
 
@@ -55,10 +58,16 @@ class RecurringSchedule
     #[ORM\GeneratedValue]
     #[ORM\Column]
     #[Groups(['recurring_schedule:read'])]
+    #[ApiProperty(description: 'Identifiant unique du planning récurrent')]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'recurringSchedules')]
     #[Groups(['recurring_schedule:read', 'recurring_schedule:write'])]
+    #[ApiProperty(
+        description: 'Sport concerné',
+        example: 1,
+        required: true
+    )]
     private ?Sports $sport = null;
 
     #[ORM\ManyToOne(inversedBy: 'recurringSchedules')]
@@ -67,6 +76,11 @@ class RecurringSchedule
 
     #[ORM\Column(length: 255)]
     #[Groups(['recurring_schedule:read', 'recurring_schedule:write'])]
+    #[ApiProperty(
+        description: 'Jour de la semaine',
+        example: 'Lundi',
+        required: true
+    )]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
@@ -75,11 +89,23 @@ class RecurringSchedule
 
     #[ORM\Column(length: 255)]
     #[Groups(['recurring_schedule:read', 'recurring_schedule:write'])]
+    #[ApiProperty(
+        description: 'Lieu de l\'entraînement',
+        example: 'Gymnase municipal',
+        required: true
+    )]
     private ?string $location = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Groups(['recurring_schedule:read', 'recurring_schedule:write'])]
-    private ?\DateTime $start_time = null;
+    #[ApiProperty(
+        description: 'Heure de début',
+        example: '14:00:00',
+        required: true
+    )]
+    #[Type("DateTime<'d/m/Y H:i'>")]
+    #[SerializedName("start_time")]
+    private ?\DateTimeInterface $start_time = null;
 
     #[ORM\Column(nullable: true)]
     #[Groups(['recurring_schedule:read', 'recurring_schedule:write'])]
@@ -89,12 +115,24 @@ class RecurringSchedule
     #[Groups(['recurring_schedule:read', 'recurring_schedule:write'])]
     private ?string $frequency = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Groups(['recurring_schedule:read', 'recurring_schedule:write'])]
-    private ?\DateTime $end_date = null;
+    #[ApiProperty(
+        description: 'Heure de fin',
+        example: '16:00:00',
+        required: true
+    )]
+    #[Type("DateTime<'d/m/Y H:i'>")]
+    #[SerializedName("end_date")]
+    private ?\DateTimeInterface $end_date = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['recurring_schedule:read', 'recurring_schedule:write'])]
+    #[ApiProperty(
+        description: 'Jour de la semaine',
+        example: 'Lundi',
+        required: true
+    )]
     private ?string $day_of_week = null;
 
     /**
@@ -103,9 +141,20 @@ class RecurringSchedule
     #[ORM\OneToMany(targetEntity: ScheduleExeption::class, mappedBy: 'recurring_schedule')]
     private Collection $scheduleExeptions;
 
+    #[ORM\Column(type: 'datetime_immutable')]
+    #[Groups(['recurring_schedule:read'])]
+    #[ApiProperty(description: 'Date de création du planning récurrent')]
+    private ?\DateTimeImmutable $created_at = null;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[Groups(['recurring_schedule:read'])]
+    #[ApiProperty(description: 'Date de dernière mise à jour du planning récurrent')]
+    private ?\DateTimeImmutable $updated_at = null;
+
     public function __construct()
     {
         $this->scheduleExeptions = new ArrayCollection();
+        $this->created_at = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -168,12 +217,12 @@ class RecurringSchedule
         return $this;
     }
 
-    public function getStartTime(): ?\DateTime
+    public function getStartTime(): ?\DateTimeInterface
     {
         return $this->start_time;
     }
 
-    public function setStartTime(\DateTime $start_time): static
+    public function setStartTime(\DateTimeInterface $start_time): static
     {
         $this->start_time = $start_time;
         return $this;
@@ -201,12 +250,12 @@ class RecurringSchedule
         return $this;
     }
 
-    public function getEndDate(): ?\DateTime
+    public function getEndDate(): ?\DateTimeInterface
     {
         return $this->end_date;
     }
 
-    public function setEndDate(\DateTime $end_date): static
+    public function setEndDate(\DateTimeInterface $end_date): static
     {
         $this->end_date = $end_date;
         return $this;
@@ -247,6 +296,28 @@ class RecurringSchedule
                 $scheduleExeption->setRecurringSchedule(null);
             }
         }
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->created_at;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $created_at): static
+    {
+        $this->created_at = $created_at;
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updated_at;
+    }
+
+    public function setUpdatedAt(?\DateTimeImmutable $updated_at): static
+    {
+        $this->updated_at = $updated_at;
         return $this;
     }
 }

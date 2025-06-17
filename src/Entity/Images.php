@@ -17,9 +17,9 @@ class Images
     #[Groups(['social_media:read', 'social_media:write'])]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: 'text')]
     #[Groups(['social_media:read', 'social_media:write'])]
-    private ?string $url = null;
+    private ?string $image = null;
 
     #[ORM\ManyToOne(inversedBy: 'image')]
     private ?Introduction $introduction = null;
@@ -45,20 +45,33 @@ class Images
     #[ORM\ManyToOne(inversedBy: 'image')]
     private ?Partners $partners = null;
 
+    #[ORM\ManyToOne(inversedBy: 'image')]
+    private ?Teams $teams = null;
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getUrl(): ?string
+    public function getImage(): ?string
     {
-        return $this->url;
+        return $this->image;
     }
 
-    public function setUrl(string $url): static
+    public function setImage(string $image): static
     {
-        $this->url = $url;
+        $this->image = $image;
+        return $this;
+    }
 
+    public function getTeams(): ?Teams
+    {
+        return $this->teams;
+    }
+
+    public function setTeams(?Teams $teams): static
+    {
+        $this->teams = $teams;
         return $this;
     }
 

@@ -12,6 +12,7 @@ use App\Repository\ScheduleExeptionRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use ApiPlatform\Metadata\ApiProperty;
 
 #[ORM\Entity(repositoryClass: ScheduleExeptionRepository::class)]
 #[ApiResource(
@@ -51,26 +52,52 @@ class ScheduleExeption
     #[ORM\GeneratedValue]
     #[ORM\Column]
     #[Groups(['schedule_exeption:read'])]
+    #[ApiProperty(description: 'Identifiant unique de l\'exception')]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'scheduleExeptions')]
     #[Groups(['schedule_exeption:read', 'schedule_exeption:write'])]
+    #[ApiProperty(
+        description: 'Planning récurrent concerné',
+        example: 1,
+        required: true
+    )]
     private ?RecurringSchedule $recurring_schedule = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Groups(['schedule_exeption:read', 'schedule_exeption:write'])]
-    private ?\DateTime $exeption_date = null;
+    #[ApiProperty(
+        description: 'Date de l\'exception',
+        example: '2024-03-25T14:00:00+00:00',
+        required: true
+    )]
+    private ?\DateTimeInterface $date = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::TIME_MUTABLE)]
     #[Groups(['schedule_exeption:read', 'schedule_exeption:write'])]
-    private ?\DateTime $start_time = null;
+    #[ApiProperty(
+        description: 'Heure de début',
+        example: '14:00:00',
+        required: true
+    )]
+    private ?\DateTimeInterface $startTime = null;
 
-    #[ORM\Column(nullable: true)]
+    #[ORM\Column(type: Types::TIME_MUTABLE)]
     #[Groups(['schedule_exeption:read', 'schedule_exeption:write'])]
-    private ?\DateTime $end_time = null;
+    #[ApiProperty(
+        description: 'Heure de fin',
+        example: '16:00:00',
+        required: true
+    )]
+    private ?\DateTimeInterface $endTime = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(length: 255)]
     #[Groups(['schedule_exeption:read', 'schedule_exeption:write'])]
+    #[ApiProperty(
+        description: 'Lieu de l\'entraînement',
+        example: 'Gymnase municipal',
+        required: true
+    )]
     private ?string $location = null;
 
     #[ORM\Column(nullable: true)]
@@ -80,6 +107,16 @@ class ScheduleExeption
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Groups(['schedule_exeption:read', 'schedule_exeption:write'])]
     private ?string $reason = null;
+
+    #[ORM\Column(type: 'datetime_immutable')]
+    #[Groups(['schedule_exeption:read'])]
+    #[ApiProperty(description: 'Date de création de l\'exception')]
+    private ?\DateTimeImmutable $createdAt = null;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[Groups(['schedule_exeption:read'])]
+    #[ApiProperty(description: 'Date de dernière mise à jour de l\'exception')]
+    private ?\DateTimeImmutable $updatedAt = null;
 
     public function getId(): ?int
     {
@@ -97,36 +134,36 @@ class ScheduleExeption
         return $this;
     }
 
-    public function getExeptionDate(): ?\DateTime
+    public function getDate(): ?\DateTimeInterface
     {
-        return $this->exeption_date;
+        return $this->date;
     }
 
-    public function setExeptionDate(\DateTime $exeption_date): static
+    public function setDate(\DateTimeInterface $date): static
     {
-        $this->exeption_date = $exeption_date;
+        $this->date = $date;
         return $this;
     }
 
-    public function getStartTime(): ?\DateTime
+    public function getStartTime(): ?\DateTimeInterface
     {
-        return $this->start_time;
+        return $this->startTime;
     }
 
-    public function setStartTime(\DateTime $start_time): static
+    public function setStartTime(\DateTimeInterface $startTime): static
     {
-        $this->start_time = $start_time;
+        $this->startTime = $startTime;
         return $this;
     }
 
-    public function getEndTime(): ?\DateTime
+    public function getEndTime(): ?\DateTimeInterface
     {
-        return $this->end_time;
+        return $this->endTime;
     }
 
-    public function setEndTime(?\DateTime $end_time): static
+    public function setEndTime(?\DateTimeInterface $endTime): static
     {
-        $this->end_time = $end_time;
+        $this->endTime = $endTime;
         return $this;
     }
 
@@ -160,6 +197,28 @@ class ScheduleExeption
     public function setReason(?string $reason): static
     {
         $this->reason = $reason;
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
+    {
+        $this->updatedAt = $updatedAt;
         return $this;
     }
 }

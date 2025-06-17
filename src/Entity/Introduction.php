@@ -15,6 +15,7 @@ use App\Repository\IntroductionRepository;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
+use ApiPlatform\Metadata\ApiProperty;
 
 #[ORM\Entity(repositoryClass: IntroductionRepository::class)]
 #[ApiResource(
@@ -54,10 +55,15 @@ class Introduction
     #[ORM\GeneratedValue]
     #[ORM\Column]
     #[Groups(['introduction:read'])]
+    #[ApiProperty(description: 'Identifiant unique de l\'introduction')]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['introduction:read', 'introduction:write'])]
+    #[ApiProperty(
+        description: 'Titre de l\'introduction',
+        example: 'Bienvenue sur notre site'
+    )]
     private ?string $title = null;
 
     /**
@@ -65,10 +71,18 @@ class Introduction
      */
     #[ORM\OneToMany(targetEntity: Images::class, mappedBy: 'introduction')]
     #[Groups(['introduction:read'])]
+    #[ApiProperty(
+        description: 'Images associées à l\'introduction',
+        example: ['data:image/jpeg;base64,...']
+    )]
     private Collection $image;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Groups(['introduction:read', 'introduction:write'])]
+    #[ApiProperty(
+        description: 'Description de l\'introduction',
+        example: 'Bienvenue sur le site de notre association...'
+    )]
     private ?string $description = null;
 
     public function __construct()

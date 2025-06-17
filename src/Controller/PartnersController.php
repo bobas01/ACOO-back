@@ -37,7 +37,7 @@ class PartnersController extends AbstractController
                 $imageUrl = null;
                 $image = $partner->getImage()->first();
                 if ($image) {
-                    $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $image->getUrl();
+                    $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $image->getImage();
                 }
 
                 $data[] = [
@@ -75,7 +75,7 @@ class PartnersController extends AbstractController
             $imageUrl = null;
             $image = $partner->getImage()->first();
             if ($image) {
-                $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $image->getUrl();
+                $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $image->getImage();
             }
 
             $data = [
@@ -102,7 +102,7 @@ class PartnersController extends AbstractController
     {
         try {
             $data = json_decode($request->getContent(), true);
-
+            
             if (!isset($data['name']) || !isset($data['description'])) {
                 return new JsonResponse([
                     'message' => 'Données manquantes. Le nom et la description sont requis.'
@@ -112,12 +112,13 @@ class PartnersController extends AbstractController
             $partner = new Partners();
             $partner->setName($data['name']);
             $partner->setDescription($data['description']);
+            $partner->setUrl($data['url'] ?? '');
             $partner->setSponsor($data['sponsor'] ?? false);
             $partner->setCreatedAt(new \DateTimeImmutable());
-
+            
             $imageUrl = null;
             if (isset($data['images']) && is_array($data['images']) && !empty($data['images'])) {
-                $base64Image = $data['images'][0];
+                $base64Image = $data['images'][0]; 
                 if (strpos($base64Image, 'data:image') === 0) {
                     $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64Image));
                     $tempFile = tempnam(sys_get_temp_dir(), 'img_');
@@ -138,7 +139,7 @@ class PartnersController extends AbstractController
                     $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $imagePath;
                     
                     $image = new Images();
-                    $image->setUrl($imagePath);
+                    $image->setImage($imagePath);
                     $partner->addImage($image);
                 }
             }
@@ -150,12 +151,14 @@ class PartnersController extends AbstractController
                 'id' => $partner->getId(),
                 'name' => $partner->getName(),
                 'description' => $partner->getDescription(),
+                'url' => $partner->getUrl(),
                 'sponsor' => $partner->isSponsor(),
                 'image' => $imageUrl,
                 'created_at' => $partner->getCreatedAt()->format('d/m/Y H:i')
             ];
 
             return new JsonResponse($response, Response::HTTP_CREATED);
+
         } catch (\Exception $e) {
             return new JsonResponse([
                 'message' => 'Erreur lors de la création du partenaire',
@@ -190,37 +193,52 @@ class PartnersController extends AbstractController
 
             $imageUrl = null;
             if (isset($data['images']) && is_array($data['images']) && !empty($data['images'])) {
+                
                 foreach ($partner->getImage() as $oldImage) {
-                    $oldImagePath = $this->getParameter('images_directory') . '/' . $oldImage->getUrl();
+                    $oldImagePath = $this->getParameter('images_directory') . '/' . $oldImage->getImage();
                     if (file_exists($oldImagePath)) {
                         unlink($oldImagePath);
                     }
                     $partner->removeImage($oldImage);
                 }
 
-                $base64Image = $data['images'][0];
-                if (strpos($base64Image, 'data:image') === 0) {
-                    $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64Image));
-                    $tempFile = tempnam(sys_get_temp_dir(), 'img_');
-                    file_put_contents($tempFile, $imageData);
+                try {
+                    $imageData = $data['images'][0];
                     
-                    $mimeType = mime_content_type($tempFile);
-                    $extension = explode('/', $mimeType)[1];
-                    
-                    $imageFile = new \Symfony\Component\HttpFoundation\File\UploadedFile(
-                        $tempFile,
-                        'image.' . $extension,
-                        $mimeType,
-                        null,
-                        true
-                    );
+                    if (strpos($imageData, 'data:image') === 0) {
+                        list($type, $imageData) = explode(';', $imageData);
+                        list(, $imageData) = explode(',', $imageData);
+                        
+                        $imageData = base64_decode($imageData);
+                        
+                        $tempFile = tempnam(sys_get_temp_dir(), 'partner_image_');
+                        file_put_contents($tempFile, $imageData);
+                        
+                        $mimeType = mime_content_type($tempFile);
+                        $extension = str_replace('image/', '', $mimeType);
+                        
+                        $imageFile = new \Symfony\Component\HttpFoundation\File\UploadedFile(
+                            $tempFile,
+                            'image.' . $extension,
+                            $mimeType,
+                            null,
+                            true
+                        );
 
-                    $imagePath = $this->imageUploadService->upload($imageFile, 'partners');
-                    $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $imagePath;
-                    
-                    $image = new Images();
-                    $image->setUrl($imagePath);
-                    $partner->addImage($image);
+                        $imagePath = $this->imageUploadService->upload($imageFile, 'partners');
+
+                        $image = new Images();
+                        $image->setImage($imagePath);
+                        $image->setPartners($partner);
+
+                        $this->entityManager->persist($image);
+
+                        $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $imagePath;
+                        
+                        unlink($tempFile);
+                    }
+                } catch (\Exception $e) {
+                    error_log('Erreur lors du traitement de l\'image : ' . $e->getMessage());
                 }
             }
 
@@ -232,7 +250,7 @@ class PartnersController extends AbstractController
                 'name' => $partner->getName(),
                 'description' => $partner->getDescription(),
                 'sponsor' => $partner->isSponsor(),
-                'image' => $imageUrl ?? ($partner->getImage()->first() ? $request->getSchemeAndHttpHost() . '/uploads/images/' . $partner->getImage()->first()->getUrl() : null),
+                'image' => $imageUrl ?? ($partner->getImage()->first() ? $request->getSchemeAndHttpHost() . '/uploads/images/' . $partner->getImage()->first()->getImage() : null),
                 'created_at' => $partner->getCreatedAt()->format('d/m/Y H:i'),
                 'updated_at' => $partner->getUpdatedAt()->format('d/m/Y H:i')
             ];
@@ -259,7 +277,7 @@ class PartnersController extends AbstractController
             }
 
             foreach ($partner->getImage() as $image) {
-                $imagePath = $this->getParameter('images_directory') . '/' . $image->getUrl();
+                $imagePath = $this->getParameter('images_directory') . '/' . $image->getImage();
                 if (file_exists($imagePath)) {
                     unlink($imagePath);
                 }

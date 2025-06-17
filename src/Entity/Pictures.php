@@ -14,6 +14,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use ApiPlatform\Metadata\ApiProperty;
 use App\Entity\Gallery;
 
 #[ORM\Entity(repositoryClass: PicturesRepository::class)]
@@ -54,29 +55,47 @@ class Pictures
     #[ORM\GeneratedValue]
     #[ORM\Column]
     #[Groups(['pictures:read'])]
+    #[ApiProperty(description: 'Identifiant unique de la photo')]
     private ?int $id = null;
 
     #[ORM\Column(type: Types::TEXT)]
     #[Groups(['pictures:read', 'pictures:write'])]
+    #[ApiProperty(
+        description: 'Description de la photo',
+        example: 'Photo de la finale du 100m',
+        required: true
+    )]
     private ?string $description = null;
 
     #[ORM\ManyToOne(inversedBy: 'pictures')]
     #[Groups(['pictures:read', 'pictures:write'])]
+    #[ApiProperty(
+        description: 'Galerie à laquelle appartient la photo',
+        example: 1,
+        required: true
+    )]
     private ?Gallery $id_gallery = null;
 
     /**
      * @var Collection<int, Images>
      */
     #[ORM\OneToMany(targetEntity: Images::class, mappedBy: 'pictures', cascade: ['persist', 'remove'])]
-    #[Groups(['pictures:read'])]
+    #[Groups(['pictures:read', 'pictures:write'])]
+    #[ApiProperty(
+        description: 'Images associées à la photo',
+        example: ['data:image/jpeg;base64,...'],
+        required: true
+    )]
     private Collection $image;
 
     #[ORM\Column(type: 'datetime_immutable')]
     #[Groups(['pictures:read'])]
+    #[ApiProperty(description: 'Date de création de la photo')]
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     #[Groups(['pictures:read'])]
+    #[ApiProperty(description: 'Date de dernière mise à jour de la photo')]
     private ?\DateTimeImmutable $updatedAt = null;
 
     public function __construct()

@@ -65,7 +65,7 @@ class IntroductionController extends AbstractController
                     $imagePath = $imageUploadService->upload($imageFile, 'introduction');
 
                     $image = new Images();
-                    $image->setUrl($imagePath);
+                    $image->setImage($imagePath);
                     $image->setIntroduction($introduction);
 
                     $entityManager->persist($image);
@@ -129,7 +129,7 @@ class IntroductionController extends AbstractController
 
             $oldImages = $introduction->getImage();
             foreach ($oldImages as $oldImage) {
-                $oldPath = $this->getParameter('images_directory') . '/' . $oldImage->getUrl();
+                $oldPath = $this->getParameter('images_directory') . '/' . $oldImage->getImage();
                 if (file_exists($oldPath)) {
                     unlink($oldPath);
                 }
@@ -157,7 +157,7 @@ class IntroductionController extends AbstractController
                     $imagePath = $imageUploadService->upload($imageFile, 'introduction');
 
                     $image = new Images();
-                    $image->setUrl($imagePath);
+                    $image->setImage($imagePath);
                     $image->setIntroduction($introduction);
 
                     $entityManager->persist($image);
@@ -199,7 +199,7 @@ class IntroductionController extends AbstractController
             }
 
             foreach ($introduction->getImage() as $image) {
-                $imagePath = $this->getParameter('images_directory') . '/' . $image->getUrl();
+                $imagePath = $this->getParameter('images_directory') . '/' . $image->getImage();
                 if (file_exists($imagePath)) {
                     unlink($imagePath);
                 }
@@ -237,7 +237,7 @@ class IntroductionController extends AbstractController
             $imageUrl = null;
             $image = $introduction->getImage()->first();
             if ($image) {
-                $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $image->getUrl();
+                $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $image->getImage();
             }
 
             return $this->json([
@@ -262,13 +262,13 @@ class IntroductionController extends AbstractController
     ): Response {
         try {
             $introductions = $entityManager->getRepository(Introduction::class)->findAll();
-
             $data = [];
+
             foreach ($introductions as $introduction) {
                 $imageUrl = null;
                 $image = $introduction->getImage()->first();
                 if ($image) {
-                    $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $image->getUrl();
+                    $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $image->getImage();
                 }
 
                 $data[] = [
@@ -279,9 +279,7 @@ class IntroductionController extends AbstractController
                 ];
             }
 
-            return $this->json([
-                'introductions' => $data
-            ], Response::HTTP_OK);
+            return $this->json($data, Response::HTTP_OK);
         } catch (\Exception $e) {
             return $this->json([
                 'error' => $e->getMessage()

@@ -12,6 +12,7 @@ use App\Repository\ContactRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use ApiPlatform\Metadata\ApiProperty;
 
 #[ORM\Entity(repositoryClass: ContactRepository::class)]
 #[ApiResource(
@@ -43,26 +44,48 @@ class Contact
     #[ORM\GeneratedValue]
     #[ORM\Column]
     #[Groups(['contact:read'])]
+    #[ApiProperty(description: 'Identifiant unique du message de contact')]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['contact:read', 'contact:write'])]
+    #[ApiProperty(
+        description: 'Nom de l\'expéditeur',
+        example: 'John Doe',
+        required: true
+    )]
     private ?string $name = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['contact:read', 'contact:write'])]
+    #[ApiProperty(
+        description: 'Adresse email de l\'expéditeur',
+        example: 'john.doe@example.com',
+        required: true
+    )]
     private ?string $mail = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['contact:read', 'contact:write'])]
+    #[ApiProperty(
+        description: 'Sujet du message',
+        example: 'Demande d\'information',
+        required: true
+    )]
     private ?string $subject = null;
 
     #[ORM\Column(type: Types::TEXT)]
     #[Groups(['contact:read', 'contact:write'])]
+    #[ApiProperty(
+        description: 'Contenu du message',
+        example: 'Je souhaiterais obtenir des informations sur...',
+        required: true
+    )]
     private ?string $description = null;
 
     #[ORM\Column]
     #[Groups(['contact:read'])]
+    #[ApiProperty(description: 'Date d\'envoi du message')]
     private ?\DateTimeImmutable $created_at = null;
 
     public function __construct()

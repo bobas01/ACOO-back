@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Teams;
 use App\Entity\Sports;
+use App\Entity\Images;
 use App\Repository\TeamsRepository;
 use App\Repository\SportsRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -68,6 +69,16 @@ class TeamsController extends AbstractController
             }
             $team->setSport($sport);
 
+         
+            if (isset($data['images']) && is_array($data['images'])) {
+                foreach ($data['images'] as $imageData) {
+                    $image = new Images();
+                    $image->setImage($imageData);
+                    $image->setTeams($team);
+                    $this->entityManager->persist($image);
+                }
+            }
+
             $this->entityManager->persist($team);
             $this->entityManager->flush();
 
@@ -109,6 +120,22 @@ class TeamsController extends AbstractController
                 $team->setSport($sport);
             }
 
+            // Gestion des images
+            if (isset($data['images']) && is_array($data['images'])) {
+                // Supprimer les anciennes images
+                foreach ($team->getImages() as $oldImage) {
+                    $this->entityManager->remove($oldImage);
+                }
+
+                // Ajouter les nouvelles images
+                foreach ($data['images'] as $imageData) {
+                    $image = new Images();
+                    $image->setImage($imageData);
+                    $image->setTeams($team);
+                    $this->entityManager->persist($image);
+                }
+            }
+
             $this->entityManager->flush();
 
             $responseData = $this->serializer->serialize($team, 'json', ['groups' => 'teams:read']);
@@ -129,6 +156,11 @@ class TeamsController extends AbstractController
             $team = $this->teamsRepository->find($id);
             if (!$team) {
                 return new JsonResponse(['message' => 'Équipe non trouvée'], Response::HTTP_NOT_FOUND);
+            }
+
+            // Supprimer les images associées
+            foreach ($team->getImages() as $image) {
+                $this->entityManager->remove($image);
             }
 
             $this->entityManager->remove($team);

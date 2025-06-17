@@ -13,6 +13,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use ApiPlatform\Metadata\ApiProperty;
 
 #[ORM\Entity(repositoryClass: PrizeListRepository::class)]
 #[ApiResource(
@@ -52,48 +53,91 @@ class PrizeList
     #[ORM\GeneratedValue]
     #[ORM\Column]
     #[Groups(['prize_list:read'])]
+    #[ApiProperty(description: 'Identifiant unique du palmarès')]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['prize_list:read', 'prize_list:write'])]
+    #[ApiProperty(
+        description: 'Nom de l\'athlète',
+        example: 'John Doe',
+        required: true
+    )]
     private ?string $athleteName = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['prize_list:read', 'prize_list:write'])]
+    #[ApiProperty(
+        description: 'Nom de la compétition',
+        example: 'Championnat de France',
+        required: true
+    )]
     private ?string $competition = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['prize_list:read', 'prize_list:write'])]
+    #[ApiProperty(
+        description: 'Catégorie de l\'athlète',
+        example: 'Senior',
+        required: true
+    )]
     private ?string $category = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['prize_list:read', 'prize_list:write'])]
+    #[ApiProperty(
+        description: 'Sport pratiqué',
+        example: 'Athlétisme',
+        required: true
+    )]
     private ?string $sport = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['prize_list:read', 'prize_list:write'])]
+    #[ApiProperty(
+        description: 'Genre de l\'athlète',
+        example: 'Masculin',
+        required: true
+    )]
     private ?string $gender = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['prize_list:read', 'prize_list:write'])]
+    #[ApiProperty(
+        description: 'Résultat obtenu',
+        example: '1er',
+        required: true
+    )]
     private ?string $result = null;
 
     #[ORM\Column]
     #[Groups(['prize_list:read', 'prize_list:write'])]
+    #[ApiProperty(
+        description: 'Année de la compétition',
+        example: 2024,
+        required: true
+    )]
     private ?int $year = null;
 
     /**
      * @var Collection<int, Images>
      */
     #[ORM\OneToMany(targetEntity: Images::class, mappedBy: 'prizeList', cascade: ['persist', 'remove'])]
+    #[Groups(['prize_list:read', 'prize_list:write'])]
+    #[ApiProperty(
+        description: 'Images associées au palmarès',
+        example: ['data:image/jpeg;base64,...']
+    )]
     private Collection $image;
 
     #[ORM\Column(type: 'datetime_immutable')]
     #[Groups(['prize_list:read'])]
+    #[ApiProperty(description: 'Date de création du palmarès')]
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     #[Groups(['prize_list:read'])]
+    #[ApiProperty(description: 'Date de dernière mise à jour du palmarès')]
     private ?\DateTimeImmutable $updatedAt = null;
 
     public function __construct()

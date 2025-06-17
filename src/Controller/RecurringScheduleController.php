@@ -33,59 +33,86 @@ class RecurringScheduleController extends AbstractController
     }
 
     #[Route('', name: 'app_recurring_schedule_create', methods: ['POST'])]
-    public function createRecurringSchedule(Request $request, EntityManagerInterface $entityManager, SerializerInterface $serializer): JsonResponse
+    public function createRecurringSchedule(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
-        
-        if (!$data) {
-            return new JsonResponse(['error' => 'Données JSON invalides'], Response::HTTP_BAD_REQUEST);
-        }
-
-        $schedule = new RecurringSchedule();
-        
-        if (isset($data['start_time'])) {
-            $startTime = \DateTime::createFromFormat('d/m/Y H:i', $data['start_time']);
-            if (!$startTime) {
-                return new JsonResponse(['error' => 'Format de date start_time invalide. Utilisez JJ/MM/AAAA HH:mm'], Response::HTTP_BAD_REQUEST);
+        try {
+            $data = json_decode($request->getContent(), true);
+            
+            if (!$data) {
+                return new JsonResponse(['error' => 'Données JSON invalides'], Response::HTTP_BAD_REQUEST);
             }
-            $schedule->setStartTime($startTime);
-        }
 
-        if (isset($data['end_date'])) {
-            $endDate = \DateTime::createFromFormat('d/m/Y H:i', $data['end_date']);
-            if (!$endDate) {
-                return new JsonResponse(['error' => 'Format de date end_date invalide. Utilisez JJ/MM/AAAA HH:mm'], Response::HTTP_BAD_REQUEST);
+            $schedule = new RecurringSchedule();
+            
+            if (isset($data['start_time'])) {
+                $startTime = \DateTime::createFromFormat('d/m/Y H:i', $data['start_time']);
+                if (!$startTime) {
+                    return new JsonResponse(['error' => 'Format de date start_time invalide. Utilisez JJ/MM/AAAA HH:mm'], Response::HTTP_BAD_REQUEST);
+                }
+                $schedule->setStartTime($startTime);
             }
-            $schedule->setEndDate($endDate);
-        }
 
-        if (isset($data['title'])) $schedule->setTitle($data['title']);
-        if (isset($data['description'])) $schedule->setDescription($data['description']);
-        if (isset($data['location'])) $schedule->setLocation($data['location']);
-        if (isset($data['duration'])) $schedule->setDuration($data['duration']);
-        if (isset($data['frequency'])) $schedule->setFrequency($data['frequency']);
-        if (isset($data['day_of_week'])) $schedule->setDayOfWeek($data['day_of_week']);
-
-        if (isset($data['sport_id'])) {
-            $sport = $entityManager->getRepository(Sports::class)->find($data['sport_id']);
-            if ($sport) {
-                $schedule->setSport($sport);
+            if (isset($data['end_date'])) {
+                $endDate = \DateTime::createFromFormat('d/m/Y H:i', $data['end_date']);
+                if (!$endDate) {
+                    return new JsonResponse(['error' => 'Format de date end_date invalide. Utilisez JJ/MM/AAAA HH:mm'], Response::HTTP_BAD_REQUEST);
+                }
+                $schedule->setEndDate($endDate);
             }
-        }
 
-        if (isset($data['team_id'])) {
-            $team = $entityManager->getRepository(Teams::class)->find($data['team_id']);
-            if ($team) {
-                $schedule->setTeam($team);
+            if (isset($data['title'])) $schedule->setTitle($data['title']);
+            if (isset($data['description'])) $schedule->setDescription($data['description']);
+            if (isset($data['location'])) $schedule->setLocation($data['location']);
+            if (isset($data['duration'])) $schedule->setDuration($data['duration']);
+            if (isset($data['frequency'])) $schedule->setFrequency($data['frequency']);
+            if (isset($data['day_of_week'])) $schedule->setDayOfWeek($data['day_of_week']);
+
+            if (isset($data['sport_id'])) {
+                $sport = $entityManager->getRepository(Sports::class)->find($data['sport_id']);
+                if ($sport) {
+                    $schedule->setSport($sport);
+                }
             }
-        }
-        
-        $entityManager->persist($schedule);
-        $entityManager->flush();
 
-        $jsonSchedule = $serializer->serialize($schedule, 'json', ['groups' => 'recurring_schedule:read']);
-        
-        return new JsonResponse($jsonSchedule, Response::HTTP_CREATED, [], true);
+            if (isset($data['team_id'])) {
+                $team = $entityManager->getRepository(Teams::class)->find($data['team_id']);
+                if ($team) {
+                    $schedule->setTeam($team);
+                }
+            }
+
+            $schedule->setCreatedAt(new \DateTimeImmutable());
+            
+            $entityManager->persist($schedule);
+            $entityManager->flush();
+
+            $response = [
+                'id' => $schedule->getId(),
+                'title' => $schedule->getTitle(),
+                'description' => $schedule->getDescription(),
+                'location' => $schedule->getLocation(),
+                'start_time' => $schedule->getStartTime() ? $schedule->getStartTime()->format('d/m/Y H:i') : null,
+                'duration' => $schedule->getDuration(),
+                'frequency' => $schedule->getFrequency(),
+                'end_date' => $schedule->getEndDate() ? $schedule->getEndDate()->format('d/m/Y H:i') : null,
+                'day_of_week' => $schedule->getDayOfWeek(),
+                'sport' => $schedule->getSport() ? [
+                    'id' => $schedule->getSport()->getId(),
+                    'name' => $schedule->getSport()->getName()
+                ] : null,
+                'team' => $schedule->getTeam() ? [
+                    'id' => $schedule->getTeam()->getId(),
+                    'name' => $schedule->getTeam()->getName()
+                ] : null,
+                'created_at' => $schedule->getCreatedAt()->format('d/m/Y H:i')
+            ];
+            
+            return new JsonResponse($response, Response::HTTP_CREATED);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'error' => $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     #[Route('/{id}', name: 'app_recurring_schedule_update', methods: ['POST'])]

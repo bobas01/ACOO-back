@@ -13,6 +13,8 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use ApiPlatform\Metadata\ApiProperty;
+use Doctrine\DBAL\Types\Types;
 
 #[ORM\Entity(repositoryClass: TeamsRepository::class)]
 #[ApiResource(
@@ -52,21 +54,34 @@ class Teams
     #[ORM\GeneratedValue]
     #[ORM\Column]
     #[Groups(['teams:read'])]
+    #[ApiProperty(description: 'Identifiant unique de l\'équipe')]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['teams:read', 'teams:write'])]
+    #[ApiProperty(
+        description: 'Nom de l\'équipe',
+        example: 'Équipe A',
+        required: true
+    )]
     private ?string $name = null;
+
 
     #[ORM\ManyToOne(inversedBy: 'teams')]
     #[Groups(['teams:read', 'teams:write'])]
-    private ?Sports $sport = null;
+    #[ApiProperty(
+        description: 'Sport pratiqué par l\'équipe',
+        example: 1,
+        required: true
+    )]
+    private ?Sports $id_sport = null;
 
     /**
      * @var Collection<int, Events>
      */
     #[ORM\ManyToMany(targetEntity: Events::class, mappedBy: 'teams')]
     #[Groups(['teams:read'])]
+    #[ApiProperty(description: 'Événements auxquels l\'équipe participe')]
     private Collection $events;
 
     /**
@@ -80,10 +95,19 @@ class Teams
     #[Groups(['teams:read', 'teams:write'])]
     private ?string $role = null;
 
+    #[ORM\OneToMany(targetEntity: Images::class, mappedBy: 'teams')]
+    #[Groups(['teams:read', 'teams:write'])]
+    #[ApiProperty(
+        description: 'Images associées à l\'équipe',
+        example: ['data:image/jpeg;base64,...']
+    )]
+    private Collection $image;
+
     public function __construct()
     {
         $this->events = new ArrayCollection();
         $this->recurringSchedules = new ArrayCollection();
+        $this->image = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -102,14 +126,16 @@ class Teams
         return $this;
     }
 
+
+
     public function getSport(): ?Sports
     {
-        return $this->sport;
+        return $this->id_sport;
     }
 
     public function setSport(?Sports $sport): static
     {
-        $this->sport = $sport;
+        $this->id_sport = $sport;
         return $this;
     }
 
@@ -173,6 +199,33 @@ class Teams
     public function setRole(string $role): static
     {
         $this->role = $role;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Images>
+     */
+    public function getImages(): Collection
+    {
+        return $this->image;
+    }
+
+    public function addImage(Images $image): static
+    {
+        if (!$this->image->contains($image)) {
+            $this->image->add($image);
+            $image->setTeams($this);
+        }
+        return $this;
+    }
+
+    public function removeImage(Images $image): static
+    {
+        if ($this->image->removeElement($image)) {
+            if ($image->getTeams() === $this) {
+                $image->setTeams(null);
+            }
+        }
         return $this;
     }
 }

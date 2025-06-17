@@ -14,6 +14,7 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Delete;
 use Symfony\Component\Serializer\Annotation\Groups;
 use App\Controller\SportsController;
+use ApiPlatform\Metadata\ApiProperty;
 
 #[ORM\Entity(repositoryClass: SportsRepository::class)]
 #[ApiResource(
@@ -21,24 +22,24 @@ use App\Controller\SportsController;
         new Get(
             uriTemplate: '/sports/{id}',
             controller: SportsController::class . '::getSport',
-            normalizationContext: ['groups' => ['sport:read']]
+            normalizationContext: ['groups' => ['sports:read']]
         ),
         new GetCollection(
             uriTemplate: '/sports',
             controller: SportsController::class . '::getAllSports',
-            normalizationContext: ['groups' => ['sport:read']]
+            normalizationContext: ['groups' => ['sports:read']]
         ),
         new Post(
             uriTemplate: '/sports',
             controller: SportsController::class . '::createSport',
             deserialize: false,
-            denormalizationContext: ['groups' => ['sport:write']]
+            denormalizationContext: ['groups' => ['sports:write']]
         ),
         new Post(
             uriTemplate: '/sports/{id}',
             controller: SportsController::class . '::updateSport',
             deserialize: false,
-            denormalizationContext: ['groups' => ['sport:write']]
+            denormalizationContext: ['groups' => ['sports:write']]
         ),
         new Delete(
             uriTemplate: '/sports/{id}',
@@ -52,47 +53,63 @@ class Sports
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['sport:read'])]
+    #[Groups(['sports:read'])]
+    #[ApiProperty(description: 'Identifiant unique du sport')]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['sport:read', 'sport:write'])]
+    #[Groups(['sports:read', 'sports:write'])]
+    #[ApiProperty(
+        description: 'Nom du sport',
+        example: 'Athlétisme',
+        required: true
+    )]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Groups(['sport:read', 'sport:write'])]
+    #[Groups(['sports:read', 'sports:write'])]
+    #[ApiProperty(
+        description: 'Description du sport',
+        example: 'L\'athlétisme est un sport qui regroupe plusieurs disciplines...',
+        required: true
+    )]
     private ?string $description = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['sport:read', 'sport:write'])]
+    #[Groups(['sports:read', 'sports:write'])]
     private ?string $contact = null;
 
     /**
      * @var Collection<int, Teams>
      */
     #[ORM\OneToMany(targetEntity: Teams::class, mappedBy: 'id_sport')]
-    #[Groups(['sport:read'])]
+    #[Groups(['sports:read'])]
     private Collection $teams;
 
     /**
      * @var Collection<int, Events>
      */
     #[ORM\OneToMany(targetEntity: Events::class, mappedBy: 'id_sport')]
-    #[Groups(['sport:read'])]
+    #[Groups(['sports:read'])]
+    #[ApiProperty(description: 'Événements associés au sport')]
     private Collection $events;
 
     /**
      * @var Collection<int, RecurringSchedule>
      */
     #[ORM\OneToMany(targetEntity: RecurringSchedule::class, mappedBy: 'id_sport')]
-    #[Groups(['sport:read'])]
+    #[Groups(['sports:read'])]
     private Collection $recurringSchedules;
 
     /**
      * @var Collection<int, images>
      */
     #[ORM\OneToMany(targetEntity: Images::class, mappedBy: 'sports')]
-    #[Groups(['sport:read'])]
+    #[Groups(['sports:read', 'sports:write'])]
+    #[ApiProperty(
+        description: 'Images associées au sport',
+        example: ['data:image/jpeg;base64,...']
+    )]
     private Collection $image;
 
     public function __construct()

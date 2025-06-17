@@ -59,6 +59,7 @@ class SocialMediasController extends AbstractController
             $socialMedia = new SocialMedias();
             $socialMedia->setPlatform($data['platform']);
             $socialMedia->setUrl($data['url']);
+            $socialMedia->setCreatedAt(new \DateTimeImmutable());
             
             $iconUrl = null;
             if (isset($data['images']) && is_array($data['images']) && !empty($data['images'])) {
@@ -92,7 +93,8 @@ class SocialMediasController extends AbstractController
                 'id' => $socialMedia->getId(),
                 'platform' => $socialMedia->getPlatform(),
                 'url' => $socialMedia->getUrl(),
-                'iconUrl' => $iconUrl
+                'iconUrl' => $iconUrl,
+                'created_at' => $socialMedia->getCreatedAt()->format('d/m/Y H:i')
             ];
 
             return new JsonResponse($response, Response::HTTP_CREATED);

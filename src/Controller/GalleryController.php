@@ -2,7 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\Images;
 use App\Entity\Gallery;
+use App\Entity\Pictures;
+use App\Service\ImageUploadService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -28,23 +31,27 @@ class GalleryController extends AbstractController
             $data = [];
 
             foreach ($galleries as $gallery) {
+                $pictures = [];
+                foreach ($gallery->getPictures() as $picture) {
+                    $imageUrl = null;
+                    $image = $picture->getImage()->first();
+                    if ($image) {
+                        $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $image->getImage();
+                    }
+
+                    $pictures[] = [
+                        'id' => $picture->getId(),
+                        'description' => $picture->getDescription(),
+                        'image' => $imageUrl,
+                        'created_at' => $picture->getCreatedAt() ? $picture->getCreatedAt()->format('d/m/Y H:i') : null,
+                        'updated_at' => $picture->getUpdatedAt() ? $picture->getUpdatedAt()->format('d/m/Y H:i') : null
+                    ];
+                }
+
                 $data[] = [
                     'id' => $gallery->getId(),
                     'theme' => $gallery->getTheme(),
-                    'pictures' => $gallery->getPictures()->map(function($picture) use ($request) {
-                        $imageUrl = null;
-                        $image = $picture->getImage()->first();
-                        if ($image) {
-                            $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $image->getUrl();
-                        }
-                        return [
-                            'id' => $picture->getId(),
-                            'description' => $picture->getDescription(),
-                            'image' => $imageUrl
-                        ];
-                    })->toArray(),
-                    'created_at' => $gallery->getCreatedAt() ? $gallery->getCreatedAt()->format('d/m/Y H:i') : null,
-                    'updated_at' => $gallery->getUpdatedAt() ? $gallery->getUpdatedAt()->format('d/m/Y H:i') : null
+                    'pictures' => $pictures
                 ];
             }
 
@@ -69,23 +76,27 @@ class GalleryController extends AbstractController
                 ], Response::HTTP_NOT_FOUND);
             }
 
+            $pictures = [];
+            foreach ($gallery->getPictures() as $picture) {
+                $imageUrl = null;
+                $image = $picture->getImage()->first();
+                if ($image) {
+                    $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $image->getImage();
+                }
+
+                $pictures[] = [
+                    'id' => $picture->getId(),
+                    'description' => $picture->getDescription(),
+                    'image' => $imageUrl,
+                    'created_at' => $picture->getCreatedAt() ? $picture->getCreatedAt()->format('d/m/Y H:i') : null,
+                    'updated_at' => $picture->getUpdatedAt() ? $picture->getUpdatedAt()->format('d/m/Y H:i') : null
+                ];
+            }
+
             $data = [
                 'id' => $gallery->getId(),
                 'theme' => $gallery->getTheme(),
-                'pictures' => $gallery->getPictures()->map(function($picture) use ($request) {
-                    $imageUrl = null;
-                    $image = $picture->getImage()->first();
-                    if ($image) {
-                        $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $image->getUrl();
-                    }
-                    return [
-                        'id' => $picture->getId(),
-                        'description' => $picture->getDescription(),
-                        'image' => $imageUrl
-                    ];
-                })->toArray(),
-                'created_at' => $gallery->getCreatedAt() ? $gallery->getCreatedAt()->format('d/m/Y H:i') : null,
-                'updated_at' => $gallery->getUpdatedAt() ? $gallery->getUpdatedAt()->format('d/m/Y H:i') : null
+                'pictures' => $pictures
             ];
 
             return new JsonResponse($data, Response::HTTP_OK);

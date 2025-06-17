@@ -3,17 +3,60 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\ApiProperty;
+use App\Controller\AuthController;
+use App\Controller\RegisterController;
 use App\Repository\AdminRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: AdminRepository::class)]
 #[ORM\Table(name: '`admin`')]
-#[ApiResource]
+#[ApiResource(
+    operations: [
+        new Get(
+            uriTemplate: '/admin/{id}',
+            controller: AuthController::class . '::show',
+            normalizationContext: ['groups' => ['admin:read']]
+        ),
+        new GetCollection(
+            uriTemplate: '/admin',
+            controller: AuthController::class . '::index',
+            normalizationContext: ['groups' => ['admin:read']]
+        ),
+        new Post(
+            uriTemplate: '/admin/register',
+            controller: RegisterController::class . '::register',
+            deserialize: false,
+            denormalizationContext: ['groups' => ['admin:write']]
+        ),
+        new Post(
+            uriTemplate: '/admin/login',
+            controller: AuthController::class . '::login',
+            deserialize: false
+        ),
+        new Post(
+            uriTemplate: '/admin/{id}',
+            controller: AuthController::class . '::update',
+            deserialize: false,
+            denormalizationContext: ['groups' => ['admin:write']]
+        ),
+        new Delete(
+            uriTemplate: '/admin/{id}',
+            controller: AuthController::class . '::delete'
+        )
+    ],
+    formats: ['json', 'multipart' => ['multipart/form-data']]
+)]
 class Admin implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]

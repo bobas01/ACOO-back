@@ -13,6 +13,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use ApiPlatform\Metadata\ApiProperty;
 
 #[ORM\Entity(repositoryClass: SocialMediasRepository::class)]
 #[ApiResource(
@@ -52,19 +53,52 @@ class SocialMedias
     #[ORM\GeneratedValue]
     #[ORM\Column]
     #[Groups(['social_media:read'])]
+    #[ApiProperty(description: 'Identifiant unique du réseau social')]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['social_media:read', 'social_media:write'])]
+    #[ApiProperty(
+        description: 'Nom du réseau social',
+        example: 'Facebook',
+        required: true
+    )]
     private ?string $platform = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['social_media:read', 'social_media:write'])]
+    #[ApiProperty(
+        description: 'URL du profil',
+        example: 'https://facebook.com/notre-association',
+        required: true
+    )]
     private ?string $url = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['social_media:read', 'social_media:write'])]
+    #[ApiProperty(
+        description: 'Logo du réseau social',
+        example: ['data:image/jpeg;base64,...']
+    )]
     private ?string $iconUrl = null;
+
+    #[ORM\OneToMany(targetEntity: Images::class, mappedBy: 'socialMedias')]
+    #[Groups(['social_media:read', 'social_media:write'])]
+    #[ApiProperty(
+        description: 'Logo du réseau social',
+        example: ['data:image/jpeg;base64,...']
+    )]
+    private Collection $image;
+
+    #[ORM\Column(type: 'datetime_immutable')]
+    #[Groups(['social_media:read'])]
+    #[ApiProperty(description: 'Date de création du réseau social')]
+    private ?\DateTimeImmutable $createdAt = null;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[Groups(['social_media:read'])]
+    #[ApiProperty(description: 'Date de dernière mise à jour du réseau social')]
+    private ?\DateTimeImmutable $updatedAt = null;
 
     public function getId(): ?int
     {
@@ -101,6 +135,28 @@ class SocialMedias
     public function setIconUrl(string $iconUrl): static
     {
         $this->iconUrl = $iconUrl;
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
+    {
+        $this->updatedAt = $updatedAt;
         return $this;
     }
 }

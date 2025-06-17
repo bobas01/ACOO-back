@@ -34,15 +34,15 @@ class NewsController extends AbstractController
         
         foreach ($news as $item) {
             $imageUrl = null;
-            $image = $item->getImage()->first();
+            $image = $item->getImages()->first();
             if ($image) {
-                $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $image->getUrl();
+                $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $image->getImage();
             }
             
             $data[] = [
                 'id' => $item->getId(),
                 'title' => $item->getTitle(),
-                'description' => $item->getDescription(),
+                'content' => $item->getContent(),
                 'image' => $imageUrl,
                 'event' => $item->getEvent() ? '/events/' . $item->getEvent()->getId() : null,
                 'created_at' => $item->getCreatedAt(),
@@ -58,15 +58,15 @@ class NewsController extends AbstractController
     public function getNews(News $news, Request $request): JsonResponse
     {
         $imageUrl = null;
-        $image = $news->getImage()->first();
+        $image = $news->getImages()->first();
         if ($image) {
-            $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $image->getUrl();
+            $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $image->getImage();
         }
         
         $data = [
             'id' => $news->getId(),
             'title' => $news->getTitle(),
-            'description' => $news->getDescription(),
+            'content' => $news->getContent(),
             'image' => $imageUrl,
             'event' => $news->getEvent() ? '/events/' . $news->getEvent()->getId() : null,
             'created_at' => $news->getCreatedAt(),
@@ -94,10 +94,11 @@ class NewsController extends AbstractController
 
             $news = new News();
             $news->setTitle($data['title']);
-            $news->setDescription($data['description']);
+            $news->setContent($data['description']);
             $news->setCreatedAt(new \DateTimeImmutable());
+            $news->setPublishedAt(new \DateTime());
+            $news->setUpdatedAt(new \DateTimeImmutable());
 
-          
             if (isset($data['startDatetime'])) {
                 $event = new Events();
                 $event->setTitle($data['title']);
@@ -106,7 +107,6 @@ class NewsController extends AbstractController
                 $event->setLocation($data['location'] ?? '');
                 $event->setIsCancelled(false);
 
-                
                 $startDate = \DateTime::createFromFormat('d/m/Y H:i', $data['startDatetime']);
                 if (!$startDate) {
                     return $this->json([
@@ -115,7 +115,6 @@ class NewsController extends AbstractController
                 }
                 $event->setStartDatetime($startDate);
 
-                
                 if (isset($data['endDatetime'])) {
                     $endDate = \DateTime::createFromFormat('d/m/Y H:i', $data['endDatetime']);
                     if (!$endDate) {
@@ -151,27 +150,20 @@ class NewsController extends AbstractController
             $imageUrl = null;
             if (isset($data['images']) && is_array($data['images']) && !empty($data['images'])) {
                 try {
-                    
                     $imageData = $data['images'][0];
                     
-                   
                     if (strpos($imageData, 'data:image') === 0) {
-                       
                         list($type, $imageData) = explode(';', $imageData);
                         list(, $imageData) = explode(',', $imageData);
                         
-                       
                         $imageData = base64_decode($imageData);
                         
-                       
                         $tempFile = tempnam(sys_get_temp_dir(), 'news_image_');
                         file_put_contents($tempFile, $imageData);
                         
-                       
                         $mimeType = mime_content_type($tempFile);
                         $extension = str_replace('image/', '', $mimeType);
                         
-                       
                         $imageFile = new \Symfony\Component\HttpFoundation\File\UploadedFile(
                             $tempFile,
                             'image.' . $extension,
@@ -183,29 +175,26 @@ class NewsController extends AbstractController
                         $imagePath = $imageUploadService->upload($imageFile, 'news');
 
                         $image = new Images();
-                        $image->setUrl($imagePath);
+                        $image->setImage($imagePath);
                         $image->setNews($news);
 
                         $entityManager->persist($image);
 
                         $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $imagePath;
                         
-                       
                         unlink($tempFile);
                     }
                 } catch (\Exception $e) {
-                   
                     error_log('Erreur lors du traitement de l\'image : ' . $e->getMessage());
                 }
             }
 
             $entityManager->flush();
 
-           
             $response = [
                 'id' => $news->getId(),
                 'title' => $news->getTitle(),
-                'description' => $news->getDescription(),
+                'content' => $news->getContent(),
                 'image' => $imageUrl,
                 'event' => $news->getEvent() ? [
                     'id' => $news->getEvent()->getId(),
@@ -221,6 +210,8 @@ class NewsController extends AbstractController
                     ] : null
                 ] : null,
                 'created_at' => $news->getCreatedAt() ? $news->getCreatedAt()->format('d/m/Y H:i') : null,
+                'updated_at' => $news->getUpdatedAt() ? $news->getUpdatedAt()->format('d/m/Y H:i') : null,
+                'published_at' => $news->getPublishedAt() ? $news->getPublishedAt()->format('d/m/Y H:i') : null,
                 'id_admin' => $news->getIdAdmin() ? '/admin/' . $news->getIdAdmin()->getId() : null
             ];
 
@@ -253,8 +244,8 @@ class NewsController extends AbstractController
             if (isset($data['title'])) {
                 $news->setTitle($data['title']);
             }
-            if (isset($data['description'])) {
-                $news->setDescription($data['description']);
+            if (isset($data['content'])) {
+                $news->setContent($data['content']);
             }
             if (isset($data['event'])) {
                 $eventId = is_string($data['event']) ? basename($data['event']) : $data['event'];
@@ -273,28 +264,23 @@ class NewsController extends AbstractController
 
             $news->setUpdatedAt(new \DateTimeImmutable());
 
-           
             $imageUrl = null;
 
             if (isset($data['image']) && !empty($data['image'])) {
-               
-                $oldImages = $news->getImage();
+                $oldImages = $news->getImages();
                 foreach ($oldImages as $oldImage) {
-                    $oldPath = $this->getParameter('images_directory') . '/' . $oldImage->getUrl();
+                    $oldPath = $this->getParameter('images_directory') . '/' . $oldImage->getImage();
                     if (file_exists($oldPath)) {
                         unlink($oldPath);
                     }
                     $entityManager->remove($oldImage);
                 }
 
-               
                 $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $data['image']));
                 
-               
                 $tempFile = tempnam(sys_get_temp_dir(), 'news_image_');
                 file_put_contents($tempFile, $imageData);
                 
-               
                 $imageFile = new \Symfony\Component\HttpFoundation\File\UploadedFile(
                     $tempFile,
                     'image.jpg',
@@ -306,19 +292,17 @@ class NewsController extends AbstractController
                 $imagePath = $imageUploadService->upload($imageFile, 'news');
 
                 $image = new Images();
-                $image->setUrl($imagePath);
+                $image->setImage($imagePath);
                 $image->setNews($news);
 
                 $entityManager->persist($image);
                 $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $imagePath;
                 
-               
                 unlink($tempFile);
             } else {
-               
-                $existingImage = $news->getImage()->first();
+                $existingImage = $news->getImages()->first();
                 if ($existingImage) {
-                    $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $existingImage->getUrl();
+                    $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $existingImage->getImage();
                 }
             }
 
@@ -327,7 +311,7 @@ class NewsController extends AbstractController
             $response = [
                 'id' => $news->getId(),
                 'title' => $news->getTitle(),
-                'description' => $news->getDescription(),
+                'content' => $news->getContent(),
                 'image' => $imageUrl,
                 'event' => $news->getEvent() ? '/events/' . $news->getEvent()->getId() : null,
                 'created_at' => $news->getCreatedAt(),
@@ -355,17 +339,14 @@ class NewsController extends AbstractController
                 ], Response::HTTP_NOT_FOUND);
             }
 
-           
-            foreach ($news->getImage() as $image) {
-               
-                $imagePath = $this->getParameter('images_directory') . '/' . $image->getUrl();
+            foreach ($news->getImages() as $image) {
+                $imagePath = $this->getParameter('images_directory') . '/' . $image->getImage();
                 if (file_exists($imagePath)) {
                     unlink($imagePath);
                 }
                 $entityManager->remove($image);
             }
 
-           
             $entityManager->remove($news);
             $entityManager->flush();
 

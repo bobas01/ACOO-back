@@ -15,6 +15,7 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Delete;
 use App\Controller\NewsController;
 use Symfony\Component\Serializer\Annotation\Groups;
+use ApiPlatform\Metadata\ApiProperty;
 
 #[ORM\Entity(repositoryClass: NewsRepository::class)]
 #[ApiResource(
@@ -53,23 +54,55 @@ class News
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['news:read'])]
+    #[ApiProperty(description: 'Identifiant unique de l\'actualité')]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['news:read', 'news:write'])]
+    #[ApiProperty(
+        description: 'Titre de l\'actualité',
+        example: 'Nouveau record battu',
+        required: true
+    )]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
     #[Groups(['news:read', 'news:write'])]
-    private ?string $description = null;
+    #[ApiProperty(
+        description: 'Contenu de l\'actualité',
+        example: 'Un nouveau record a été battu lors du championnat...',
+        required: true
+    )]
+    private ?string $content = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(['news:read'])]
+    #[ApiProperty(
+        description: 'Date de publication de l\'actualité',
+        example: '2024-03-20T10:00:00+00:00'
+    )]
+    private ?\DateTimeInterface $publishedAt = null;
+
+    #[ORM\ManyToOne(inversedBy: 'news')]
+    #[Groups(['news:read', 'news:write'])]
+    #[ApiProperty(
+        description: 'Événement associé à l\'actualité',
+        example: 1
+    )]
+    private ?Events $event = null;
+
+    #[ORM\OneToMany(targetEntity: Images::class, mappedBy: 'news')]
+    #[Groups(['news:read', 'news:write'])]
+    #[ApiProperty(
+        description: 'Images associées à l\'actualité',
+        example: ['data:image/jpeg;base64,...']
+    )]
+    private Collection $images;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['news:read', 'news:write'])]
     private ?string $imgUrl = null;
-
-    #[ORM\ManyToOne(targetEntity: Events::class, inversedBy: 'news')]
-    #[Groups(['news:read', 'news:write'])]
-    private ?Events $event = null;
 
     #[ORM\Column]
     #[Groups(['news:read', 'news:write'])]
@@ -82,15 +115,9 @@ class News
     #[ORM\ManyToOne(inversedBy: 'news')]
     private ?admin $id_admin = null;
 
-    /**
-     * @var Collection<int, images>
-     */
-    #[ORM\OneToMany(targetEntity: Images::class, mappedBy: 'news')]
-    private Collection $image;
-
     public function __construct()
     {
-        $this->image = new ArrayCollection();
+        $this->images = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -110,26 +137,26 @@ class News
         return $this;
     }
 
-    public function getDescription(): ?string
+    public function getContent(): ?string
     {
-        return $this->description;
+        return $this->content;
     }
 
-    public function setDescription(string $description): static
+    public function setContent(string $content): static
     {
-        $this->description = $description;
+        $this->content = $content;
 
         return $this;
     }
 
-    public function getImgUrl(): ?string
+    public function getPublishedAt(): ?\DateTimeInterface
     {
-        return $this->imgUrl;
+        return $this->publishedAt;
     }
 
-    public function setImgUrl(?string $imgUrl): static
+    public function setPublishedAt(?\DateTimeInterface $publishedAt): static
     {
-        $this->imgUrl = $imgUrl;
+        $this->publishedAt = $publishedAt;
 
         return $this;
     }
@@ -142,6 +169,18 @@ class News
     public function setEvent(?Events $event): static
     {
         $this->event = $event;
+
+        return $this;
+    }
+
+    public function getImgUrl(): ?string
+    {
+        return $this->imgUrl;
+    }
+
+    public function setImgUrl(?string $imgUrl): static
+    {
+        $this->imgUrl = $imgUrl;
 
         return $this;
     }
@@ -185,15 +224,15 @@ class News
     /**
      * @return Collection<int, images>
      */
-    public function getImage(): Collection
+    public function getImages(): Collection
     {
-        return $this->image;
+        return $this->images;
     }
 
     public function addImage(images $image): static
     {
-        if (!$this->image->contains($image)) {
-            $this->image->add($image);
+        if (!$this->images->contains($image)) {
+            $this->images->add($image);
             $image->setNews($this);
         }
 
@@ -202,7 +241,7 @@ class News
 
     public function removeImage(images $image): static
     {
-        if ($this->image->removeElement($image)) {
+        if ($this->images->removeElement($image)) {
             
             if ($image->getNews() === $this) {
                 $image->setNews(null);

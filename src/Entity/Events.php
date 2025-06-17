@@ -14,6 +14,7 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Delete;
 use App\Controller\EventsController;
+use ApiPlatform\Metadata\ApiProperty;
 
 #[ORM\Entity(repositoryClass: EventsRepository::class)]
 #[ApiResource(
@@ -53,49 +54,98 @@ class Events
     #[ORM\GeneratedValue]
     #[ORM\Column]
     #[Groups(['events:read', 'events:write'])]
+    #[ApiProperty(description: 'Identifiant unique de l\'événement')]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['events:read', 'events:write'])]
+    #[ApiProperty(
+        description: 'Titre de l\'événement',
+        example: 'Championnat de France 2024',
+        required: true
+    )]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
     #[Groups(['events:read', 'events:write'])]
+    #[ApiProperty(
+        description: 'Description détaillée de l\'événement',
+        example: 'Championnat de France d\'athlétisme...',
+        required: true
+    )]
     private ?string $content = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['events:read', 'events:write'])]
+    #[ApiProperty(
+        description: 'Type d\'événement',
+        example: 'Compétition',
+        required: true
+    )]
     private ?string $eventType = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['events:read', 'events:write'])]
+    #[ApiProperty(
+        description: 'Lieu de l\'événement',
+        example: 'Stade de France',
+        required: true
+    )]
     private ?string $location = null;
 
     #[ORM\Column]
     #[Groups(['events:read', 'events:write'])]
+    #[ApiProperty(
+        description: 'Indique si l\'événement est annulé',
+        example: false,
+        required: true
+    )]
     private ?bool $isCancelled = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Groups(['events:read', 'events:write'])]
+    #[ApiProperty(
+        description: 'Date et heure de début de l\'événement',
+        example: '2024-06-15T14:00:00+00:00',
+        required: true
+    )]
     private ?\DateTimeInterface $startDatetime = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     #[Groups(['events:read', 'events:write'])]
+    #[ApiProperty(
+        description: 'Date et heure de fin de l\'événement',
+        example: '2024-06-15T18:00:00+00:00'
+    )]
     private ?\DateTimeInterface $endDatetime = null;
 
     #[ORM\ManyToOne(inversedBy: 'events')]
     #[Groups(['events:read', 'events:write'])]
+    #[ApiProperty(
+        description: 'Sport associé à l\'événement',
+        example: 1,
+        required: true
+    )]
     private ?Sports $sport = null;
 
     #[ORM\ManyToMany(targetEntity: Teams::class, inversedBy: 'events')]
     #[Groups(['events:read', 'events:write'])]
+    #[ApiProperty(
+        description: 'Équipes participantes',
+        example: [1, 2]
+    )]
     private Collection $teams;
 
     #[ORM\OneToMany(targetEntity: News::class, mappedBy: 'event')]
+    #[ApiProperty(description: 'Actualités liées à l\'événement')]
     private Collection $news;
 
     #[ORM\OneToMany(targetEntity: Images::class, mappedBy: 'event')]
     #[Groups(['events:read', 'events:write'])]
+    #[ApiProperty(
+        description: 'Images associées à l\'événement',
+        example: ['data:image/jpeg;base64,...']
+    )]
     private Collection $images;
 
     public function __construct()

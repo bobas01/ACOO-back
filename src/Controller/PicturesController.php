@@ -38,7 +38,7 @@ class PicturesController extends AbstractController
                 $imageUrl = null;
                 $image = $picture->getImage()->first();
                 if ($image) {
-                    $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $image->getUrl();
+                    $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $image->getImage();
                 }
 
                 $data[] = [
@@ -78,7 +78,7 @@ class PicturesController extends AbstractController
             $imageUrl = null;
             $image = $picture->getImage()->first();
             if ($image) {
-                $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $image->getUrl();
+                $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $image->getImage();
             }
 
             $data = [
@@ -149,7 +149,7 @@ class PicturesController extends AbstractController
                     $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $imagePath;
                     
                     $image = new Images();
-                    $image->setUrl($imagePath);
+                    $image->setImage($imagePath);
                     $picture->addImage($image);
                 }
             }
@@ -208,7 +208,7 @@ class PicturesController extends AbstractController
             $imageUrl = null;
             if (isset($data['images']) && is_array($data['images']) && !empty($data['images'])) {
                 foreach ($picture->getImage() as $oldImage) {
-                    $oldImagePath = $this->getParameter('images_directory') . '/' . $oldImage->getUrl();
+                    $oldImagePath = $this->getParameter('images_directory') . '/' . $oldImage->getImage();
                     if (file_exists($oldImagePath)) {
                         unlink($oldImagePath);
                     }
@@ -236,7 +236,7 @@ class PicturesController extends AbstractController
                     $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $imagePath;
                     
                     $image = new Images();
-                    $image->setUrl($imagePath);
+                    $image->setImage($imagePath);
                     $picture->addImage($image);
                 }
             }
@@ -251,7 +251,7 @@ class PicturesController extends AbstractController
                     'id' => $picture->getIdGallery()->getId(),
                     'theme' => $picture->getIdGallery()->getTheme()
                 ] : null,
-                'image' => $imageUrl ?? ($picture->getImage()->first() ? $request->getSchemeAndHttpHost() . '/uploads/images/' . $picture->getImage()->first()->getUrl() : null),
+                'image' => $imageUrl ?? ($picture->getImage()->first() ? $request->getSchemeAndHttpHost() . '/uploads/images/' . $picture->getImage()->first()->getImage() : null),
                 'created_at' => $picture->getCreatedAt()->format('d/m/Y H:i'),
                 'updated_at' => $picture->getUpdatedAt()->format('d/m/Y H:i')
             ];
@@ -278,7 +278,7 @@ class PicturesController extends AbstractController
             }
 
             foreach ($picture->getImage() as $image) {
-                $imagePath = $this->getParameter('images_directory') . '/' . $image->getUrl();
+                $imagePath = $this->getParameter('images_directory') . '/' . $image->getImage();
                 if (file_exists($imagePath)) {
                     unlink($imagePath);
                 }

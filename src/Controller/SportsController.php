@@ -69,7 +69,7 @@ class SportsController extends AbstractController
                     $imagePath = $imageUploadService->upload($imageFile, 'sports');
 
                     $image = new Images();
-                    $image->setUrl($imagePath);
+                    $image->setImage($imagePath);
                     $image->setSports($sport);
 
                     $entityManager->persist($image);
@@ -139,7 +139,7 @@ class SportsController extends AbstractController
             // Supprimer les anciennes images
             $oldImages = $sport->getImage();
             foreach ($oldImages as $oldImage) {
-                $oldPath = $this->getParameter('images_directory') . '/' . $oldImage->getUrl();
+                $oldPath = $this->getParameter('images_directory') . '/' . $oldImage->getImage();
                 if (file_exists($oldPath)) {
                     unlink($oldPath);
                 }
@@ -168,7 +168,7 @@ class SportsController extends AbstractController
                     $imagePath = $imageUploadService->upload($imageFile, 'sports');
 
                     $image = new Images();
-                    $image->setUrl($imagePath);
+                    $image->setImage($imagePath);
                     $image->setSports($sport);
 
                     $entityManager->persist($image);
@@ -212,7 +212,7 @@ class SportsController extends AbstractController
 
             // Supprimer les images associées
             foreach ($sport->getImage() as $image) {
-                $imagePath = $this->getParameter('images_directory') . '/' . $image->getUrl();
+                $imagePath = $this->getParameter('images_directory') . '/' . $image->getImage();
                 if (file_exists($imagePath)) {
                     unlink($imagePath);
                 }
@@ -249,17 +249,15 @@ class SportsController extends AbstractController
 
             $imageUrls = [];
             foreach ($sport->getImage() as $image) {
-                $imageUrls[] = $request->getSchemeAndHttpHost() . '/uploads/images/' . $image->getUrl();
+                $imageUrls[] = $request->getSchemeAndHttpHost() . '/uploads/images/' . $image->getImage();
             }
 
             return $this->json([
-                'sport' => [
-                    'id' => $sport->getId(),
-                    'name' => $sport->getName(),
-                    'description' => $sport->getDescription(),
-                    'contact' => $sport->getContact(),
-                    'images' => $imageUrls
-                ]
+                'id' => $sport->getId(),
+                'name' => $sport->getName(),
+                'description' => $sport->getDescription(),
+                'contact' => $sport->getContact(),
+                'images' => $imageUrls
             ], Response::HTTP_OK);
         } catch (\Exception $e) {
             return $this->json([
@@ -275,15 +273,15 @@ class SportsController extends AbstractController
     ): Response {
         try {
             $sports = $entityManager->getRepository(Sports::class)->findAll();
+            $sportsData = [];
 
-            $data = [];
             foreach ($sports as $sport) {
                 $imageUrls = [];
                 foreach ($sport->getImage() as $image) {
-                    $imageUrls[] = $request->getSchemeAndHttpHost() . '/uploads/images/' . $image->getUrl();
+                    $imageUrls[] = $request->getSchemeAndHttpHost() . '/uploads/images/' . $image->getImage();
                 }
 
-                $data[] = [
+                $sportsData[] = [
                     'id' => $sport->getId(),
                     'name' => $sport->getName(),
                     'description' => $sport->getDescription(),
@@ -292,9 +290,7 @@ class SportsController extends AbstractController
                 ];
             }
 
-            return $this->json([
-                'sports' => $data
-            ], Response::HTTP_OK);
+            return $this->json($sportsData, Response::HTTP_OK);
         } catch (\Exception $e) {
             return $this->json([
                 'error' => $e->getMessage()

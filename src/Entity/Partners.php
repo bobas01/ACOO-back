@@ -14,6 +14,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use ApiPlatform\Metadata\ApiProperty;
 
 #[ORM\Entity(repositoryClass: PartnersRepository::class)]
 #[ApiResource(
@@ -53,18 +54,43 @@ class Partners
     #[ORM\GeneratedValue]
     #[ORM\Column]
     #[Groups(['partners:read'])]
+    #[ApiProperty(description: 'Identifiant unique du partenaire')]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['partners:read', 'partners:write'])]
+    #[ApiProperty(
+        description: 'Nom du partenaire',
+        example: 'Nike',
+        required: true
+    )]
     private ?string $name = null;
+
+    #[ORM\Column(length: 255)]
+    #[Groups(['partners:read', 'partners:write'])]
+    #[ApiProperty(
+        description: 'URL du site web du partenaire',
+        example: 'https://www.nike.com',
+        required: true
+    )]
+    private ?string $url = null;
 
     #[ORM\Column(type: Types::TEXT)]
     #[Groups(['partners:read', 'partners:write'])]
+    #[ApiProperty(
+        description: 'Description détaillée du partenaire',
+        example: 'Équipementier sportif officiel',
+        required: true
+    )]
     private ?string $description = null;
 
     #[ORM\Column(type: 'boolean')]
     #[Groups(['partners:read', 'partners:write'])]
+    #[ApiProperty(
+        description: 'Indique si le partenaire est un sponsor',
+        example: true,
+        default: false
+    )]
     private ?bool $sponsor = false;
 
     /**
@@ -72,14 +98,28 @@ class Partners
      */
     #[ORM\OneToMany(targetEntity: Images::class, mappedBy: 'partners', cascade: ['persist', 'remove'])]
     #[Groups(['partners:read'])]
+    #[ApiProperty(
+        description: 'Images associées au partenaire',
+        example: ['data:image/jpeg;base64,...']
+    )]
     private Collection $image;
+
+    #[ORM\OneToMany(targetEntity: Images::class, mappedBy: 'partners')]
+    #[Groups(['partners:read', 'partners:write'])]
+    #[ApiProperty(
+        description: 'Logo du partenaire',
+        example: ['data:image/jpeg;base64,...']
+    )]
+    private Collection $logo;
 
     #[ORM\Column(type: 'datetime_immutable')]
     #[Groups(['partners:read'])]
+    #[ApiProperty(description: 'Date de création du partenaire')]
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     #[Groups(['partners:read'])]
+    #[ApiProperty(description: 'Date de dernière mise à jour du partenaire')]
     private ?\DateTimeImmutable $updatedAt = null;
 
     public function __construct()
@@ -101,6 +141,17 @@ class Partners
     public function setName(string $name): static
     {
         $this->name = $name;
+        return $this;
+    }
+
+    public function getUrl(): ?string
+    {
+        return $this->url;
+    }
+
+    public function setUrl(string $url): static
+    {
+        $this->url = $url;
         return $this;
     }
 
@@ -148,6 +199,33 @@ class Partners
         if ($this->image->removeElement($image)) {
             if ($image->getPartners() === $this) {
                 $image->setPartners(null);
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Images>
+     */
+    public function getLogo(): Collection
+    {
+        return $this->logo;
+    }
+
+    public function addLogo(Images $logo): static
+    {
+        if (!$this->logo->contains($logo)) {
+            $this->logo->add($logo);
+            $logo->setPartners($this);
+        }
+        return $this;
+    }
+
+    public function removeLogo(Images $logo): static
+    {
+        if ($this->logo->removeElement($logo)) {
+            if ($logo->getPartners() === $this) {
+                $logo->setPartners(null);
             }
         }
         return $this;

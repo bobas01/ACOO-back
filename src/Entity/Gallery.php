@@ -13,6 +13,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use ApiPlatform\Metadata\ApiProperty;
 
 #[ORM\Entity(repositoryClass: GalleryRepository::class)]
 #[ApiResource(
@@ -50,10 +51,16 @@ class Gallery
     #[ORM\GeneratedValue]
     #[ORM\Column]
     #[Groups(['gallery:read'])]
+    #[ApiProperty(description: 'Identifiant unique de la galerie')]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['gallery:read', 'gallery:write'])]
+    #[ApiProperty(
+        description: 'Thème de la galerie',
+        example: 'Championnats de France 2024',
+        required: true
+    )]
     private ?string $theme = null;
 
     /**
@@ -61,14 +68,26 @@ class Gallery
      */
     #[ORM\OneToMany(targetEntity: Pictures::class, mappedBy: 'id_gallery', cascade: ['persist', 'remove'])]
     #[Groups(['gallery:read'])]
+    #[ApiProperty(
+        description: 'Liste des photos dans la galerie',
+        example: [
+            [
+                'id' => 1,
+                'description' => 'Photo de la finale',
+                'image' => 'http://localhost:8000/uploads/images/pictures/image-123456789.jpg'
+            ]
+        ]
+    )]
     private Collection $pictures;
 
     #[ORM\Column(type: 'datetime_immutable')]
     #[Groups(['gallery:read'])]
+    #[ApiProperty(description: 'Date de création de la galerie')]
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     #[Groups(['gallery:read'])]
+    #[ApiProperty(description: 'Date de dernière mise à jour de la galerie')]
     private ?\DateTimeImmutable $updatedAt = null;
 
     public function __construct()

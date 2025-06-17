@@ -37,7 +37,7 @@ class PrizeListController extends AbstractController
                 $imageUrl = null;
                 $image = $prizeList->getImage()->first();
                 if ($image) {
-                    $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $image->getUrl();
+                    $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $image->getImage();
                 }
 
                 $data[] = [
@@ -79,7 +79,7 @@ class PrizeListController extends AbstractController
             $imageUrl = null;
             $image = $prizeList->getImage()->first();
             if ($image) {
-                $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $image->getUrl();
+                $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $image->getImage();
             }
 
             $data = [
@@ -151,7 +151,7 @@ class PrizeListController extends AbstractController
                     $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $imagePath;
                     
                     $image = new Images();
-                    $image->setUrl($imagePath);
+                    $image->setImage($imagePath);
                     $prizeList->addImage($image);
                 }
             }
@@ -220,9 +220,11 @@ class PrizeListController extends AbstractController
             $imageUrl = null;
             if (isset($data['images']) && is_array($data['images']) && !empty($data['images'])) {
                 foreach ($prizeList->getImage() as $oldImage) {
-                    $oldImagePath = $this->getParameter('images_directory') . '/' . $oldImage->getUrl();
-                    if (file_exists($oldImagePath)) {
-                        unlink($oldImagePath);
+                    if ($oldImage->getImage()) {
+                        $oldImagePath = $this->getParameter('images_directory') . '/' . $oldImage->getImage();
+                        if (file_exists($oldImagePath) && is_file($oldImagePath)) {
+                            unlink($oldImagePath);
+                        }
                     }
                     $prizeList->removeImage($oldImage);
                 }
@@ -248,7 +250,7 @@ class PrizeListController extends AbstractController
                     $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $imagePath;
                     
                     $image = new Images();
-                    $image->setUrl($imagePath);
+                    $image->setImage($imagePath);
                     $prizeList->addImage($image);
                 }
             }
@@ -265,7 +267,7 @@ class PrizeListController extends AbstractController
                 'gender' => $prizeList->getGender(),
                 'result' => $prizeList->getResult(),
                 'year' => $prizeList->getYear(),
-                'image' => $imageUrl ?? ($prizeList->getImage()->first() ? $request->getSchemeAndHttpHost() . '/uploads/images/' . $prizeList->getImage()->first()->getUrl() : null),
+                'image' => $imageUrl ?? ($prizeList->getImage()->first() ? $request->getSchemeAndHttpHost() . '/uploads/images/' . $prizeList->getImage()->first()->getImage() : null),
                 'created_at' => $prizeList->getCreatedAt()->format('d/m/Y H:i'),
                 'updated_at' => $prizeList->getUpdatedAt()->format('d/m/Y H:i')
             ];
@@ -291,9 +293,8 @@ class PrizeListController extends AbstractController
                 ], Response::HTTP_NOT_FOUND);
             }
 
-            
             foreach ($prizeList->getImage() as $image) {
-                $imagePath = $this->getParameter('images_directory') . '/' . $image->getUrl();
+                $imagePath = $this->getParameter('images_directory') . '/' . $image->getImage();
                 if (file_exists($imagePath)) {
                     unlink($imagePath);
                 }
