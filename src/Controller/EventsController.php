@@ -88,7 +88,6 @@ class EventsController extends AbstractController
             $event->setLocation($data['location'] ?? '');
             $event->setIsCancelled(false);
 
-            // Conversion de la date de début au format français
             $startDate = \DateTime::createFromFormat('d/m/Y H:i', $data['startDatetime']);
             if (!$startDate) {
                 return $this->json([
@@ -97,7 +96,6 @@ class EventsController extends AbstractController
             }
             $event->setStartDatetime($startDate);
 
-            // Conversion de la date de fin au format français si elle existe
             if (isset($data['endDatetime'])) {
                 $endDate = \DateTime::createFromFormat('d/m/Y H:i', $data['endDatetime']);
                 if (!$endDate) {

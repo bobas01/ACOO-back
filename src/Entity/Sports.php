@@ -195,7 +195,6 @@ class Sports
     public function removeEvent(Events $event): static
     {
         if ($this->events->removeElement($event)) {
-            // set the owning side to null (unless already changed)
             if ($event->getSport() === $this) {
                 $event->setSport(null);
             }
@@ -225,7 +224,6 @@ class Sports
     public function removeRecurringSchedule(RecurringSchedule $recurringSchedule): static
     {
         if ($this->recurringSchedules->removeElement($recurringSchedule)) {
-            // set the owning side to null (unless already changed)
             if ($recurringSchedule->getSport() === $this) {
                 $recurringSchedule->setSport(null);
             }
@@ -255,7 +253,6 @@ class Sports
     public function removeImage(images $image): static
     {
         if ($this->image->removeElement($image)) {
-            // set the owning side to null (unless already changed)
             if ($image->getSports() === $this) {
                 $image->setSports(null);
             }

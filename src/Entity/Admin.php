@@ -136,6 +136,6 @@ class Admin implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function eraseCredentials(): void
     {
-        // Si vous stockez des informations sensibles, effacez-les ici
+        
     }
 }

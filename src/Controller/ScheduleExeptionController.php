@@ -44,7 +44,6 @@ class ScheduleExeptionController extends AbstractController
 
         $exeption = new ScheduleExeption();
         
-        // Conversion des dates au format français
         if (isset($data['exeption_date'])) {
             $exeptionDate = \DateTime::createFromFormat('d/m/Y H:i', $data['exeption_date']);
             if (!$exeptionDate) {
@@ -69,12 +68,10 @@ class ScheduleExeptionController extends AbstractController
             $exeption->setEndTime($endTime);
         }
 
-        // Autres champs
         if (isset($data['location'])) $exeption->setLocation($data['location']);
         if (isset($data['is_cancelled'])) $exeption->setIsCancelled($data['is_cancelled']);
         if (isset($data['reason'])) $exeption->setReason($data['reason']);
 
-        // Gestion de la relation avec le planning récurrent
         if (isset($data['recurring_schedule'])) {
             $recurringSchedule = $entityManager->getRepository(RecurringSchedule::class)->find($data['recurring_schedule']);
             if ($recurringSchedule) {
@@ -103,7 +100,6 @@ class ScheduleExeptionController extends AbstractController
             return new JsonResponse(['error' => 'Données JSON invalides'], Response::HTTP_BAD_REQUEST);
         }
 
-        // Conversion des dates au format français
         if (isset($data['exeption_date'])) {
             $exeptionDate = \DateTime::createFromFormat('d/m/Y H:i', $data['exeption_date']);
             if (!$exeptionDate) {
@@ -128,12 +124,10 @@ class ScheduleExeptionController extends AbstractController
             $scheduleExeption->setEndTime($endTime);
         }
 
-        // Autres champs
         if (isset($data['location'])) $scheduleExeption->setLocation($data['location']);
         if (isset($data['is_cancelled'])) $scheduleExeption->setIsCancelled($data['is_cancelled']);
         if (isset($data['reason'])) $scheduleExeption->setReason($data['reason']);
 
-        // Gestion de la relation avec le planning récurrent
         if (isset($data['recurring_schedule'])) {
             $recurringSchedule = $entityManager->getRepository(RecurringSchedule::class)->find($data['recurring_schedule']);
             if ($recurringSchedule) {

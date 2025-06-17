@@ -43,7 +43,6 @@ class RecurringScheduleController extends AbstractController
 
         $schedule = new RecurringSchedule();
         
-        // Conversion des dates au format français
         if (isset($data['start_time'])) {
             $startTime = \DateTime::createFromFormat('d/m/Y H:i', $data['start_time']);
             if (!$startTime) {
@@ -60,7 +59,6 @@ class RecurringScheduleController extends AbstractController
             $schedule->setEndDate($endDate);
         }
 
-        // Autres champs
         if (isset($data['title'])) $schedule->setTitle($data['title']);
         if (isset($data['description'])) $schedule->setDescription($data['description']);
         if (isset($data['location'])) $schedule->setLocation($data['location']);
@@ -68,7 +66,6 @@ class RecurringScheduleController extends AbstractController
         if (isset($data['frequency'])) $schedule->setFrequency($data['frequency']);
         if (isset($data['day_of_week'])) $schedule->setDayOfWeek($data['day_of_week']);
 
-        // Gestion des relations
         if (isset($data['sport_id'])) {
             $sport = $entityManager->getRepository(Sports::class)->find($data['sport_id']);
             if ($sport) {
@@ -100,7 +97,6 @@ class RecurringScheduleController extends AbstractController
             return new JsonResponse(['error' => 'Données JSON invalides'], Response::HTTP_BAD_REQUEST);
         }
 
-        // Conversion des dates au format français
         if (isset($data['start_time'])) {
             $startTime = \DateTime::createFromFormat('d/m/Y H:i', $data['start_time']);
             if (!$startTime) {
@@ -117,7 +113,6 @@ class RecurringScheduleController extends AbstractController
             $recurringSchedule->setEndDate($endDate);
         }
 
-        // Autres champs
         if (isset($data['title'])) $recurringSchedule->setTitle($data['title']);
         if (isset($data['description'])) $recurringSchedule->setDescription($data['description']);
         if (isset($data['location'])) $recurringSchedule->setLocation($data['location']);
@@ -125,7 +120,6 @@ class RecurringScheduleController extends AbstractController
         if (isset($data['frequency'])) $recurringSchedule->setFrequency($data['frequency']);
         if (isset($data['day_of_week'])) $recurringSchedule->setDayOfWeek($data['day_of_week']);
 
-        // Gestion des relations
         if (isset($data['sport_id'])) {
             $sport = $entityManager->getRepository(Sports::class)->find($data['sport_id']);
             if ($sport) {

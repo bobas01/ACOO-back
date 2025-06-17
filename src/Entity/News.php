@@ -203,7 +203,7 @@ class News
     public function removeImage(images $image): static
     {
         if ($this->image->removeElement($image)) {
-            // set the owning side to null (unless already changed)
+            
             if ($image->getNews() === $this) {
                 $image->setNews(null);
             }

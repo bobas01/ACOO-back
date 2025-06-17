@@ -190,7 +190,6 @@ class PartnersController extends AbstractController
 
             $imageUrl = null;
             if (isset($data['images']) && is_array($data['images']) && !empty($data['images'])) {
-                // Supprimer l'ancienne image si elle existe
                 foreach ($partner->getImage() as $oldImage) {
                     $oldImagePath = $this->getParameter('images_directory') . '/' . $oldImage->getUrl();
                     if (file_exists($oldImagePath)) {
@@ -259,7 +258,6 @@ class PartnersController extends AbstractController
                 ], Response::HTTP_NOT_FOUND);
             }
 
-            // Supprimer les images associées
             foreach ($partner->getImage() as $image) {
                 $imagePath = $this->getParameter('images_directory') . '/' . $image->getUrl();
                 if (file_exists($imagePath)) {

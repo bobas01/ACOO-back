@@ -34,13 +34,12 @@ class AuthController extends AbstractController
         $admin = $this->entityManager->getRepository(Admin::class)->findOneBy(['username' => $username]);
 
         if (!$admin || !$this->passwordHasher->isPasswordValid($admin, $password)) {
-            // throw new AuthenticationException('Identifiants invalides.');
             return $this->json(['message' => 'Identifiants invalides.'], Response::HTTP_UNAUTHORIZED);
         }
 
         $token = $JWTManager->create($admin);
 
-        // Récupère la durée de vie du token (en secondes)
+
         $tokenTtl = $this->getParameter('lexik_jwt_authentication.token_ttl') ?? 3600;
         $expiresAt = (new \DateTimeImmutable())->modify("+{$tokenTtl} seconds")->getTimestamp();
         

@@ -126,7 +126,6 @@ class PicturesController extends AbstractController
             $picture->setIdGallery($gallery);
             $picture->setCreatedAt(new \DateTimeImmutable());
 
-            // Gestion de l'image
             $imageUrl = null;
             if (isset($data['images']) && is_array($data['images']) && !empty($data['images'])) {
                 $base64Image = $data['images'][0];
@@ -206,10 +205,8 @@ class PicturesController extends AbstractController
                 $picture->setIdGallery($gallery);
             }
 
-            // Gestion de l'image
             $imageUrl = null;
             if (isset($data['images']) && is_array($data['images']) && !empty($data['images'])) {
-                // Supprimer l'ancienne image si elle existe
                 foreach ($picture->getImage() as $oldImage) {
                     $oldImagePath = $this->getParameter('images_directory') . '/' . $oldImage->getUrl();
                     if (file_exists($oldImagePath)) {
@@ -280,7 +277,6 @@ class PicturesController extends AbstractController
                 ], Response::HTTP_NOT_FOUND);
             }
 
-            // Supprimer les images associées
             foreach ($picture->getImage() as $image) {
                 $imagePath = $this->getParameter('images_directory') . '/' . $image->getUrl();
                 if (file_exists($imagePath)) {

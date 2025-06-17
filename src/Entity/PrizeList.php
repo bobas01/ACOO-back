@@ -211,7 +211,7 @@ class PrizeList
     public function removeImage(Images $image): static
     {
         if ($this->image->removeElement($image)) {
-            // set the owning side to null (unless already changed)
+            
             if ($image->getPrizeList() === $this) {
                 $image->setPrizeList(null);
             }

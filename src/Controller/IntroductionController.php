@@ -127,7 +127,6 @@ class IntroductionController extends AbstractController
                 $introduction->setDescription($description);
             }
 
-            // Supprimer les anciennes images
             $oldImages = $introduction->getImage();
             foreach ($oldImages as $oldImage) {
                 $oldPath = $this->getParameter('images_directory') . '/' . $oldImage->getUrl();
@@ -137,7 +136,6 @@ class IntroductionController extends AbstractController
                 $entityManager->remove($oldImage);
             }
 
-            // Traiter les nouvelles images
             $imageUrls = [];
             foreach ($images as $base64Image) {
                 if (strpos($base64Image, 'data:image') === 0) {
@@ -200,9 +198,7 @@ class IntroductionController extends AbstractController
                 ], Response::HTTP_NOT_FOUND);
             }
 
-            // Supprimer les images associées
             foreach ($introduction->getImage() as $image) {
-                // Supprimer le fichier physique
                 $imagePath = $this->getParameter('images_directory') . '/' . $image->getUrl();
                 if (file_exists($imagePath)) {
                     unlink($imagePath);
@@ -210,7 +206,6 @@ class IntroductionController extends AbstractController
                 $entityManager->remove($image);
             }
 
-            // Supprimer l'introduction
             $entityManager->remove($introduction);
             $entityManager->flush();
 
@@ -239,7 +234,6 @@ class IntroductionController extends AbstractController
                 ], Response::HTTP_NOT_FOUND);
             }
 
-            // Récupérer l'URL de l'image si elle existe
             $imageUrl = null;
             $image = $introduction->getImage()->first();
             if ($image) {
