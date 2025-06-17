@@ -48,6 +48,9 @@ class Images
     #[ORM\ManyToOne(inversedBy: 'image')]
     private ?Teams $teams = null;
 
+    #[ORM\OneToOne(mappedBy: 'image', cascade: ['persist', 'remove'])]
+    private ?Staffs $staffs = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -167,6 +170,28 @@ class Images
     public function setPartners(?Partners $partners): static
     {
         $this->partners = $partners;
+
+        return $this;
+    }
+
+    public function getStaffs(): ?Staffs
+    {
+        return $this->staffs;
+    }
+
+    public function setStaffs(?Staffs $staffs): static
+    {
+        // unset the owning side of the relation if necessary
+        if ($staffs === null && $this->staffs !== null) {
+            $this->staffs->setImage(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($staffs !== null && $staffs->getImage() !== $this) {
+            $staffs->setImage($this);
+        }
+
+        $this->staffs = $staffs;
 
         return $this;
     }

@@ -103,11 +103,18 @@ class Teams
     )]
     private Collection $image;
 
+    /**
+     * @var Collection<int, Staffs>
+     */
+    #[ORM\ManyToMany(targetEntity: Staffs::class, mappedBy: 'team')]
+    private Collection $staffs;
+
     public function __construct()
     {
         $this->events = new ArrayCollection();
         $this->recurringSchedules = new ArrayCollection();
         $this->image = new ArrayCollection();
+        $this->staffs = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -226,6 +233,33 @@ class Teams
                 $image->setTeams(null);
             }
         }
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Staffs>
+     */
+    public function getStaffs(): Collection
+    {
+        return $this->staffs;
+    }
+
+    public function addStaff(Staffs $staff): static
+    {
+        if (!$this->staffs->contains($staff)) {
+            $this->staffs->add($staff);
+            $staff->addTeam($this);
+        }
+
+        return $this;
+    }
+
+    public function removeStaff(Staffs $staff): static
+    {
+        if ($this->staffs->removeElement($staff)) {
+            $staff->removeTeam($this);
+        }
+
         return $this;
     }
 }
