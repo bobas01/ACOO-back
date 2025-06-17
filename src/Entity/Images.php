@@ -5,6 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\ImagesRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ImagesRepository::class)]
 #[ApiResource]
@@ -13,9 +14,11 @@ class Images
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['social_media:read', 'social_media:write'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['social_media:read', 'social_media:write'])]
     private ?string $url = null;
 
     #[ORM\ManyToOne(inversedBy: 'image')]
