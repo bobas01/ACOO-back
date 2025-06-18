@@ -37,14 +37,15 @@ security:
     # - { path: ^/admin, roles: ROLE_ADMIN }
     # - { path: ^/profile, roles: ROLE_USER }
     - { path: ^/api/login, roles: PUBLIC_ACCESS, methods: [POST]}
+    - { path: ^/api/contact$, roles: PUBLIC_ACCESS, methods: [POST]}
+    - { path: ^/api/contact$, roles: IS_AUTHENTICATED_FULLY, methods: [GET]}
+
     - { path: ^/api/docs, roles: PUBLIC_ACCESS }
     - { path: ^/api/docs.json, roles: PUBLIC_ACCESS }
     - { path: ^/$, roles: PUBLIC_ACCESS } # Page d'accueil de l'API
     # Autorise GET sur les routes concernées
-    - { path: ^/api/questions, roles: PUBLIC_ACCESS, methods: [GET] }
-    - { path: ^/api/contact_clubs, roles: PUBLIC_ACCESS, methods: [GET] }
-    - { path: ^/api/introduction, roles: PUBLIC_ACCESS, methods: [GET] }
-    - { path: ^/api/social_medias, roles: PUBLIC_ACCESS, methods: [GET] }
+    - { path: ^/api/, roles: PUBLIC_ACCESS, methods: [GET] }
+
 
     # Règle générale pour le reste de l'API
     - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }

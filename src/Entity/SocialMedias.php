@@ -74,11 +74,13 @@ class SocialMedias
     )]
     private ?string $url = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, options: ['default' => 'https://cdn-icons-png.flaticon.com/512/7046/7046086.png'])]
     #[Groups(['social_media:read', 'social_media:write'])]
     #[ApiProperty(
         description: 'Logo du réseau social',
-        example: ['data:image/jpeg;base64,...']
+        example: ['data:image/jpeg;base64,...'],
+               required: false,
+    default: 'https://cdn-icons-png.flaticon.com/512/7046/7046086.png'
     )]
     private ?string $iconUrl = null;
 
