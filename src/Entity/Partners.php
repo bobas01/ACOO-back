@@ -97,20 +97,16 @@ class Partners
      * @var Collection<int, Images>
      */
     #[ORM\OneToMany(targetEntity: Images::class, mappedBy: 'partners', cascade: ['persist', 'remove'])]
-    #[Groups(['partners:read'])]
-    #[ApiProperty(
-        description: 'Images associées au partenaire',
-        example: ['data:image/jpeg;base64,...']
-    )]
+    #[ApiProperty(readable: false, writable: false)]
     private Collection $image;
 
-    #[ORM\OneToMany(targetEntity: Images::class, mappedBy: 'partners')]
-    #[Groups(['partners:read', 'partners:write'])]
     #[ApiProperty(
-        description: 'Logo du partenaire',
-        example: ['data:image/jpeg;base64,...']
+        description: 'Images associées au partenaire (tableau base64 pour upload)',
+        example: ['data:image/jpeg;base64,...'],
+        required: false
     )]
-    private Collection $logo;
+    #[Groups(['partners:read', 'partners:write'])]
+    private ?array $images = null;
 
     #[ORM\Column(type: 'datetime_immutable')]
     #[Groups(['partners:read'])]
@@ -204,30 +200,14 @@ class Partners
         return $this;
     }
 
-    /**
-     * @return Collection<int, Images>
-     */
-    public function getLogo(): Collection
+    public function getImages(): ?array
     {
-        return $this->logo;
+        return $this->images;
     }
 
-    public function addLogo(Images $logo): static
+    public function setImages(?array $images): static
     {
-        if (!$this->logo->contains($logo)) {
-            $this->logo->add($logo);
-            $logo->setPartners($this);
-        }
-        return $this;
-    }
-
-    public function removeLogo(Images $logo): static
-    {
-        if ($this->logo->removeElement($logo)) {
-            if ($logo->getPartners() === $this) {
-                $logo->setPartners(null);
-            }
-        }
+        $this->images = $images;
         return $this;
     }
 

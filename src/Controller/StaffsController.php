@@ -138,8 +138,8 @@ class StaffsController extends AbstractController
                 }
             }
 
-            if (isset($data['images']) && is_array($data['images']) && !empty($data['images'])) {
-                $base64Image = $data['images'][0];
+            if (isset($data['image']) && is_array($data['image']) && !empty($data['image'])) {
+                $base64Image = $data['image'][0];
                 if (strpos($base64Image, 'data:image') === 0) {
                     $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64Image));
                     $tempFile = tempnam(sys_get_temp_dir(), 'img_');
@@ -236,7 +236,7 @@ class StaffsController extends AbstractController
                 }
             }
 
-            if (isset($data['images']) && is_array($data['images']) && !empty($data['images'])) {
+            if (isset($data['image']) && is_array($data['image']) && !empty($data['image'])) {
                 $oldImage = $staff->getImage();
                 if ($oldImage) {
                     $oldImagePath = $this->getParameter('images_directory') . '/' . $oldImage->getImage();
@@ -246,7 +246,7 @@ class StaffsController extends AbstractController
                     $this->entityManager->remove($oldImage);
                 }
 
-                $base64Image = $data['images'][0];
+                $base64Image = $data['image'][0];
                 if (strpos($base64Image, 'data:image') === 0) {
                     $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64Image));
                     $tempFile = tempnam(sys_get_temp_dir(), 'img_');

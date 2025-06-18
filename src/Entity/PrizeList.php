@@ -123,12 +123,16 @@ class PrizeList
      * @var Collection<int, Images>
      */
     #[ORM\OneToMany(targetEntity: Images::class, mappedBy: 'prizeList', cascade: ['persist', 'remove'])]
-    #[Groups(['prize_list:read', 'prize_list:write'])]
-    #[ApiProperty(
-        description: 'Images associées au palmarès',
-        example: ['data:image/jpeg;base64,...']
-    )]
+    #[ApiProperty(readable: false, writable: false)]
     private Collection $image;
+
+    #[ApiProperty(
+        description: 'Images associées au palmarès (tableau base64 pour upload)',
+        example: ['data:image/jpeg;base64,...'],
+        required: false
+    )]
+    #[Groups(['prize_list:read', 'prize_list:write'])]
+    private ?array $images = null;
 
     #[ORM\Column(type: 'datetime_immutable')]
     #[Groups(['prize_list:read'])]
@@ -283,6 +287,17 @@ class PrizeList
     public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
+        return $this;
+    }
+
+    public function getImages(): ?array
+    {
+        return $this->images;
+    }
+
+    public function setImages(?array $images): static
+    {
+        $this->images = $images;
         return $this;
     }
 }

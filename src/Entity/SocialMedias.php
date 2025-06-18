@@ -75,20 +75,20 @@ class SocialMedias
     private ?string $url = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['social_media:read', 'social_media:write'])]
-    #[ApiProperty(
-        description: 'Logo du réseau social',
-        example: ['data:image/jpeg;base64,...']
-    )]
+    #[ApiProperty(readable: false, writable: false)]
     private ?string $iconUrl = null;
 
     #[ORM\OneToMany(targetEntity: Images::class, mappedBy: 'socialMedias')]
-    #[Groups(['social_media:read', 'social_media:write'])]
-    #[ApiProperty(
-        description: 'Logo du réseau social',
-        example: ['data:image/jpeg;base64,...']
-    )]
+    #[ApiProperty(readable: false, writable: false)]
     private Collection $image;
+
+    #[ApiProperty(
+        description: 'Images associées au réseau social (tableau base64 pour upload)',
+        example: ['data:image/jpeg;base64,...'],
+        required: false
+    )]
+    #[Groups(['social_media:read', 'social_media:write'])]
+    private ?array $images = null;
 
     #[ORM\Column(type: 'datetime_immutable')]
     #[Groups(['social_media:read'])]
@@ -135,6 +135,17 @@ class SocialMedias
     public function setIconUrl(string $iconUrl): static
     {
         $this->iconUrl = $iconUrl;
+        return $this;
+    }
+
+    public function getImages(): ?array
+    {
+        return $this->images;
+    }
+
+    public function setImages(?array $images): static
+    {
+        $this->images = $images;
         return $this;
     }
 

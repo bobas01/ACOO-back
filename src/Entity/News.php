@@ -95,24 +95,26 @@ class News
     #[ORM\OneToMany(targetEntity: Images::class, mappedBy: 'news')]
     #[Groups(['news:read', 'news:write'])]
     #[ApiProperty(
-        description: 'Images associées à l\'actualité',
-        example: ['data:image/jpeg;base64,...']
+        description: 'Images associées à l\'actualité (tableau base64 pour upload)',
+        example: ['data:image/jpeg;base64,...'],
+        required: false
     )]
     private Collection $images;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['news:read', 'news:write'])]
+    #[ApiProperty(readable: false, writable: false)]
     private ?string $imgUrl = null;
 
     #[ORM\Column]
-    #[Groups(['news:read', 'news:write'])]
+    #[ApiProperty(readable: false, writable: false)]
     private ?\DateTimeImmutable $created_at = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['news:read', 'news:write'])]
+    #[ApiProperty(readable: false, writable: false)]
     private ?\DateTimeImmutable $updated_at = null;
 
     #[ORM\ManyToOne(inversedBy: 'news')]
+    #[ApiProperty(readable: false, writable: false)]
     private ?admin $id_admin = null;
 
     public function __construct()

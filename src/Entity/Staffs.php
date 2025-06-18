@@ -95,7 +95,7 @@ class Staffs
     #[ORM\OneToOne(inversedBy: 'staffs', cascade: ['persist', 'remove'])]
     #[Groups(['staffs:read', 'staffs:write'])]
     #[ApiProperty(
-        description: 'Photo du membre du staff',
+        description: 'Photo du membre du staff (tableau base64 pour upload)',
         example: ['data:image/jpeg;base64,...']
     )]
     private ?Images $image = null;

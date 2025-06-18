@@ -93,7 +93,7 @@ class SocialMediasController extends AbstractController
                 'id' => $socialMedia->getId(),
                 'platform' => $socialMedia->getPlatform(),
                 'url' => $socialMedia->getUrl(),
-                'iconUrl' => $iconUrl,
+                'images' => $iconUrl ? [$iconUrl] : [],
                 'created_at' => $socialMedia->getCreatedAt()->format('d/m/Y H:i')
             ];
 
@@ -160,7 +160,7 @@ class SocialMediasController extends AbstractController
                 'id' => $socialMedia->getId(),
                 'platform' => $socialMedia->getPlatform(),
                 'url' => $socialMedia->getUrl(),
-                'iconUrl' => $iconUrl ?? $socialMedia->getIconUrl()
+                'images' => $iconUrl ? [$iconUrl] : ($socialMedia->getIconUrl() ? [$socialMedia->getIconUrl()] : [])
             ];
 
             return new JsonResponse($response, Response::HTTP_OK);

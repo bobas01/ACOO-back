@@ -45,7 +45,7 @@ class PartnersController extends AbstractController
                     'name' => $partner->getName(),
                     'description' => $partner->getDescription(),
                     'sponsor' => $partner->isSponsor(),
-                    'image' => $imageUrl,
+                    'images' => $imageUrl ? [$imageUrl] : [],
                     'created_at' => $partner->getCreatedAt() ? $partner->getCreatedAt()->format('d/m/Y H:i') : null,
                     'updated_at' => $partner->getUpdatedAt() ? $partner->getUpdatedAt()->format('d/m/Y H:i') : null
                 ];
@@ -83,7 +83,7 @@ class PartnersController extends AbstractController
                 'name' => $partner->getName(),
                 'description' => $partner->getDescription(),
                 'sponsor' => $partner->isSponsor(),
-                'image' => $imageUrl,
+                'images' => $imageUrl ? [$imageUrl] : [],
                 'created_at' => $partner->getCreatedAt() ? $partner->getCreatedAt()->format('d/m/Y H:i') : null,
                 'updated_at' => $partner->getUpdatedAt() ? $partner->getUpdatedAt()->format('d/m/Y H:i') : null
             ];
@@ -153,7 +153,7 @@ class PartnersController extends AbstractController
                 'description' => $partner->getDescription(),
                 'url' => $partner->getUrl(),
                 'sponsor' => $partner->isSponsor(),
-                'image' => $imageUrl,
+                'images' => $imageUrl ? [$imageUrl] : [],
                 'created_at' => $partner->getCreatedAt()->format('d/m/Y H:i')
             ];
 
@@ -250,7 +250,7 @@ class PartnersController extends AbstractController
                 'name' => $partner->getName(),
                 'description' => $partner->getDescription(),
                 'sponsor' => $partner->isSponsor(),
-                'image' => $imageUrl ?? ($partner->getImage()->first() ? $request->getSchemeAndHttpHost() . '/uploads/images/' . $partner->getImage()->first()->getImage() : null),
+                'images' => $imageUrl ? [$imageUrl] : ($partner->getImage()->first() ? [$request->getSchemeAndHttpHost() . '/uploads/images/' . $partner->getImage()->first()->getImage()] : []),
                 'created_at' => $partner->getCreatedAt()->format('d/m/Y H:i'),
                 'updated_at' => $partner->getUpdatedAt()->format('d/m/Y H:i')
             ];

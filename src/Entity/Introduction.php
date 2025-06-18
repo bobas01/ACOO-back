@@ -72,7 +72,7 @@ class Introduction
     #[ORM\OneToMany(targetEntity: Images::class, mappedBy: 'introduction')]
     #[Groups(['introduction:read'])]
     #[ApiProperty(
-        description: 'Images associées à l\'introduction',
+        description: 'Images associées à l\'introduction (tableau base64 pour upload)',
         example: ['data:image/jpeg;base64,...']
     )]
     private Collection $image;
@@ -84,6 +84,14 @@ class Introduction
         example: 'Bienvenue sur le site de notre association...'
     )]
     private ?string $description = null;
+
+    #[ApiProperty(
+        description: 'Images associées à l\'introduction (tableau base64 pour upload)',
+        example: ['data:image/jpeg;base64,...'],
+        required: false
+    )]
+    #[Groups(['introduction:read', 'introduction:write'])]
+    private ?array $images = null;
 
     public function __construct()
     {
@@ -145,6 +153,18 @@ class Introduction
     public function setDescription(?string $description): static
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    public function getImages(): ?array
+    {
+        return $this->images;
+    }
+
+    public function setImages(?array $images): static
+    {
+        $this->images = $images;
 
         return $this;
     }

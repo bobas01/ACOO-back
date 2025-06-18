@@ -49,7 +49,7 @@ class PrizeListController extends AbstractController
                     'gender' => $prizeList->getGender(),
                     'result' => $prizeList->getResult(),
                     'year' => $prizeList->getYear(),
-                    'image' => $imageUrl,
+                    'images' => $imageUrl ? [$imageUrl] : [],
                     'created_at' => $prizeList->getCreatedAt() ? $prizeList->getCreatedAt()->format('d/m/Y H:i') : null,
                     'updated_at' => $prizeList->getUpdatedAt() ? $prizeList->getUpdatedAt()->format('d/m/Y H:i') : null
                 ];
@@ -91,7 +91,7 @@ class PrizeListController extends AbstractController
                 'gender' => $prizeList->getGender(),
                 'result' => $prizeList->getResult(),
                 'year' => $prizeList->getYear(),
-                'image' => $imageUrl,
+                'images' => $imageUrl ? [$imageUrl] : [],
                 'created_at' => $prizeList->getCreatedAt() ? $prizeList->getCreatedAt()->format('d/m/Y H:i') : null,
                 'updated_at' => $prizeList->getUpdatedAt() ? $prizeList->getUpdatedAt()->format('d/m/Y H:i') : null
             ];
@@ -168,7 +168,7 @@ class PrizeListController extends AbstractController
                 'gender' => $prizeList->getGender(),
                 'result' => $prizeList->getResult(),
                 'year' => $prizeList->getYear(),
-                'image' => $imageUrl,
+                'images' => $imageUrl ? [$imageUrl] : [],
                 'created_at' => $prizeList->getCreatedAt()->format('d/m/Y H:i')
             ];
 
@@ -267,7 +267,7 @@ class PrizeListController extends AbstractController
                 'gender' => $prizeList->getGender(),
                 'result' => $prizeList->getResult(),
                 'year' => $prizeList->getYear(),
-                'image' => $imageUrl ?? ($prizeList->getImage()->first() ? $request->getSchemeAndHttpHost() . '/uploads/images/' . $prizeList->getImage()->first()->getImage() : null),
+                'images' => $imageUrl ? [$imageUrl] : ($prizeList->getImage()->first() ? [$request->getSchemeAndHttpHost() . '/uploads/images/' . $prizeList->getImage()->first()->getImage()] : []),
                 'created_at' => $prizeList->getCreatedAt()->format('d/m/Y H:i'),
                 'updated_at' => $prizeList->getUpdatedAt()->format('d/m/Y H:i')
             ];
