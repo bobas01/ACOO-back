@@ -59,25 +59,30 @@ use Symfony\Component\Validator\Constraints as Assert;
 )]
 class Admin implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
-    #[Assert\NotBlank]
-    #[Assert\Length(min: 3)]
-    private ?string $username = null;
+#[ORM\Id]
+#[ORM\GeneratedValue]
+#[ORM\Column]
+#[Groups(['admin:read'])]
+private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
-    #[Assert\NotBlank]
-    #[Assert\Email]
-    private ?string $email = null;
+#[ORM\Column(length: 255)]
+#[Assert\NotBlank]
+#[Assert\Length(min: 3)]
+#[Groups(['admin:read', 'admin:write'])]
+private ?string $username = null;
 
-    #[ORM\Column(length: 255)]
-    #[Assert\NotBlank]
-    #[Assert\Length(min: 12)]
-    private ?string $password = null;
+#[ORM\Column(length: 255)]
+#[Assert\NotBlank]
+#[Assert\Email]
+#[Groups(['admin:read', 'admin:write'])]
+private ?string $email = null;
+
+#[ORM\Column(length: 255)]
+#[Assert\NotBlank]
+#[Assert\Length(min: 12)]
+#[Groups(['admin:write'])]
+private ?string $password = null;
 
     /**
      * @var Collection<int, News>

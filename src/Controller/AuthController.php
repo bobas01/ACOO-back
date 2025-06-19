@@ -50,7 +50,6 @@ class AuthController extends AbstractController
             'id' => $admin->getId(),
             'username' => $admin->getUsername(),
             'email' => $admin->getEmail(),
-            'roles' => ['ROLE_ADMIN'],
             'tokenData' => [
                 'expires_at' => $expiresAt,
                 'token' => $token,

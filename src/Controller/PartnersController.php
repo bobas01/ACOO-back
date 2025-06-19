@@ -45,6 +45,7 @@ class PartnersController extends AbstractController
                     'name' => $partner->getName(),
                     'description' => $partner->getDescription(),
                     'sponsor' => $partner->isSponsor(),
+                    'url' => $partner->getUrl(),
                     'image' => $imageUrl,
                     'created_at' => $partner->getCreatedAt() ? $partner->getCreatedAt()->format('d/m/Y H:i') : null,
                     'updated_at' => $partner->getUpdatedAt() ? $partner->getUpdatedAt()->format('d/m/Y H:i') : null
@@ -82,6 +83,7 @@ class PartnersController extends AbstractController
                 'id' => $partner->getId(),
                 'name' => $partner->getName(),
                 'description' => $partner->getDescription(),
+                'url' => $partner->getUrl(),
                 'sponsor' => $partner->isSponsor(),
                 'image' => $imageUrl,
                 'created_at' => $partner->getCreatedAt() ? $partner->getCreatedAt()->format('d/m/Y H:i') : null,
@@ -249,6 +251,7 @@ class PartnersController extends AbstractController
                 'id' => $partner->getId(),
                 'name' => $partner->getName(),
                 'description' => $partner->getDescription(),
+                'url' => $partner->getUrl(),
                 'sponsor' => $partner->isSponsor(),
                 'image' => $imageUrl ?? ($partner->getImage()->first() ? $request->getSchemeAndHttpHost() . '/uploads/images/' . $partner->getImage()->first()->getImage() : null),
                 'created_at' => $partner->getCreatedAt()->format('d/m/Y H:i'),
