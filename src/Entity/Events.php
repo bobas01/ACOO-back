@@ -60,7 +60,7 @@ class Events
     #[ORM\Column(length: 255)]
     #[Groups(['events:read', 'events:write'])]
     #[ApiProperty(
-        description: 'Titre de l\'événement',
+        description: 'Titre de l\'événement (partagé avec la news associée)',
         example: 'Championnat de France 2024',
         required: true
     )]
@@ -69,7 +69,7 @@ class Events
     #[ORM\Column(type: Types::TEXT)]
     #[Groups(['events:read', 'events:write'])]
     #[ApiProperty(
-        description: 'Description détaillée de l\'événement',
+        description: 'Description détaillée de l\'événement (partagée avec la news associée)',
         example: 'Championnat de France d\'athlétisme...',
         required: true
     )]
@@ -105,8 +105,8 @@ class Events
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Groups(['events:read', 'events:write'])]
     #[ApiProperty(
-        description: 'Date et heure de début de l\'événement',
-        example: '2024-06-15T14:00:00+00:00',
+        description: 'Date et heure de début de l\'événement (format: JJ/MM/AAAA HH:mm)',
+        example: '20/06/2024 15:00',
         required: true
     )]
     private ?\DateTimeInterface $startDatetime = null;
@@ -114,15 +114,15 @@ class Events
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     #[Groups(['events:read', 'events:write'])]
     #[ApiProperty(
-        description: 'Date et heure de fin de l\'événement',
-        example: '2024-06-15T18:00:00+00:00'
+        description: 'Date et heure de fin de l\'événement (format: JJ/MM/AAAA HH:mm)',
+        example: '20/06/2024 17:00'
     )]
     private ?\DateTimeInterface $endDatetime = null;
 
     #[ORM\ManyToOne(inversedBy: 'events')]
     #[Groups(['events:read', 'events:write'])]
     #[ApiProperty(
-        description: 'Sport associé à l\'événement',
+        description: 'Sport associé à l\'événement (ID du sport)',
         example: 1,
         required: true
     )]
@@ -131,19 +131,24 @@ class Events
     #[ORM\ManyToMany(targetEntity: Teams::class, inversedBy: 'events')]
     #[Groups(['events:read', 'events:write'])]
     #[ApiProperty(
-        description: 'Équipes participantes',
+        description: 'Équipes participantes (tableau d\'IDs)',
         example: [1, 2]
     )]
     private Collection $teams;
 
     #[ORM\OneToMany(targetEntity: News::class, mappedBy: 'event')]
-    #[ApiProperty(description: 'Actualités liées à l\'événement')]
+    #[ApiProperty(
+        description: 'Actualités liées à l\'événement (généré automatiquement)',
+        example: ['/news/1', '/news/2'],
+        readable: true,
+        writable: false
+    )]
     private Collection $news;
 
     #[ORM\OneToMany(targetEntity: Images::class, mappedBy: 'event')]
     #[Groups(['events:read', 'events:write'])]
     #[ApiProperty(
-        description: 'Images associées à l\'événement',
+        description: 'Images associées à l\'événement (tableau base64 pour upload)',
         example: ['data:image/jpeg;base64,...']
     )]
     private Collection $images;

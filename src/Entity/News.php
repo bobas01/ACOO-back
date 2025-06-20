@@ -61,7 +61,7 @@ class News
     #[ORM\Column(length: 255)]
     #[Groups(['news:read', 'news:write'])]
     #[ApiProperty(
-        description: 'Titre de l\'actualité',
+        description: 'Titre de l\'actualité (peut être partagé avec un événement associé)',
         example: 'Nouveau record battu',
         required: true
     )]
@@ -70,7 +70,7 @@ class News
     #[ORM\Column(type: Types::TEXT)]
     #[Groups(['news:read', 'news:write'])]
     #[ApiProperty(
-        description: 'Contenu de l\'actualité',
+        description: 'Contenu de l\'actualité (peut être partagé avec un événement associé)',
         example: 'Un nouveau record a été battu lors du championnat...',
         required: true
     )]
@@ -87,7 +87,7 @@ class News
     #[ORM\ManyToOne(inversedBy: 'news')]
     #[Groups(['news:read', 'news:write'])]
     #[ApiProperty(
-        description: 'Événement associé à l\'actualité',
+        description: 'Événement associé à l\'actualité (optionnel - une news peut exister sans événement)',
         example: 1
     )]
     private ?Events $event = null;

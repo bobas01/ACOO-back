@@ -99,10 +99,12 @@ class NewsController extends AbstractController
             $news->setPublishedAt(new \DateTime());
             $news->setUpdatedAt(new \DateTimeImmutable());
 
+            // Si des champs d'événement sont présents, créer automatiquement un événement associé
+            // Un événement est toujours lié à une news, mais une news peut exister sans événement
             if (isset($data['startDatetime'])) {
                 $event = new Events();
                 $event->setTitle($data['title']);
-                $event->setContent($data['description']);
+                $event->setContent($data['content']);
                 $event->setEventType($data['eventType'] ?? 'default');
                 $event->setLocation($data['location'] ?? '');
                 $event->setIsCancelled(false);
@@ -133,7 +135,6 @@ class NewsController extends AbstractController
                 }
 
                 $entityManager->persist($event);
-                $entityManager->flush();
                 $news->setEvent($event);
             }
 

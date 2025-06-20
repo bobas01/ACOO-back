@@ -36,7 +36,7 @@ class PicturesController extends AbstractController
 
             foreach ($pictures as $picture) {
                 $imageUrl = null;
-                $image = $picture->getImage()->first();
+                $image = $picture->getImages()->first();
                 if ($image) {
                     $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $image->getImage();
                 }
@@ -48,7 +48,7 @@ class PicturesController extends AbstractController
                         'id' => $picture->getIdGallery()->getId(),
                         'theme' => $picture->getIdGallery()->getTheme()
                     ] : null,
-                    'image' => $imageUrl,
+                    'images' => $imageUrl ? [$imageUrl] : [],
                     'created_at' => $picture->getCreatedAt() ? $picture->getCreatedAt()->format('d/m/Y H:i') : null,
                     'updated_at' => $picture->getUpdatedAt() ? $picture->getUpdatedAt()->format('d/m/Y H:i') : null
                 ];
@@ -76,7 +76,7 @@ class PicturesController extends AbstractController
             }
 
             $imageUrl = null;
-            $image = $picture->getImage()->first();
+            $image = $picture->getImages()->first();
             if ($image) {
                 $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $image->getImage();
             }
@@ -88,7 +88,7 @@ class PicturesController extends AbstractController
                     'id' => $picture->getIdGallery()->getId(),
                     'theme' => $picture->getIdGallery()->getTheme()
                 ] : null,
-                'image' => $imageUrl,
+                'images' => $imageUrl ? [$imageUrl] : [],
                 'created_at' => $picture->getCreatedAt() ? $picture->getCreatedAt()->format('d/m/Y H:i') : null,
                 'updated_at' => $picture->getUpdatedAt() ? $picture->getUpdatedAt()->format('d/m/Y H:i') : null
             ];
@@ -164,7 +164,7 @@ class PicturesController extends AbstractController
                     'id' => $gallery->getId(),
                     'theme' => $gallery->getTheme()
                 ],
-                'image' => $imageUrl,
+                'images' => $imageUrl ? [$imageUrl] : [],
                 'created_at' => $picture->getCreatedAt()->format('d/m/Y H:i')
             ];
 
@@ -207,7 +207,7 @@ class PicturesController extends AbstractController
 
             $imageUrl = null;
             if (isset($data['images']) && is_array($data['images']) && !empty($data['images'])) {
-                foreach ($picture->getImage() as $oldImage) {
+                foreach ($picture->getImages() as $oldImage) {
                     $oldImagePath = $this->getParameter('images_directory') . '/' . $oldImage->getImage();
                     if (file_exists($oldImagePath)) {
                         unlink($oldImagePath);
@@ -251,7 +251,7 @@ class PicturesController extends AbstractController
                     'id' => $picture->getIdGallery()->getId(),
                     'theme' => $picture->getIdGallery()->getTheme()
                 ] : null,
-                'image' => $imageUrl ?? ($picture->getImage()->first() ? $request->getSchemeAndHttpHost() . '/uploads/images/' . $picture->getImage()->first()->getImage() : null),
+                'images' => $imageUrl ? [$imageUrl] : [],
                 'created_at' => $picture->getCreatedAt()->format('d/m/Y H:i'),
                 'updated_at' => $picture->getUpdatedAt()->format('d/m/Y H:i')
             ];
@@ -277,7 +277,7 @@ class PicturesController extends AbstractController
                 ], Response::HTTP_NOT_FOUND);
             }
 
-            foreach ($picture->getImage() as $image) {
+            foreach ($picture->getImages() as $image) {
                 $imagePath = $this->getParameter('images_directory') . '/' . $image->getImage();
                 if (file_exists($imagePath)) {
                     unlink($imagePath);

@@ -78,9 +78,8 @@ class SocialMedias
     #[Groups(['social_media:read', 'social_media:write'])]
     #[ApiProperty(
         description: 'Logo du réseau social',
-        example: ['data:image/jpeg;base64,...'],
-               required: false,
-    default: 'https://cdn-icons-png.flaticon.com/512/7046/7046086.png'
+        example: 'https://cdn-icons-png.flaticon.com/512/7046/7046086.png',
+        required: false
     )]
     private ?string $iconUrl = null;
 

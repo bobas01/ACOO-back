@@ -137,7 +137,7 @@ class SportsController extends AbstractController
             }
 
             // Supprimer les anciennes images
-            $oldImages = $sport->getImage();
+            $oldImages = $sport->getImages();
             foreach ($oldImages as $oldImage) {
                 $oldPath = $this->getParameter('images_directory') . '/' . $oldImage->getImage();
                 if (file_exists($oldPath)) {
@@ -211,7 +211,7 @@ class SportsController extends AbstractController
             }
 
             // Supprimer les images associées
-            foreach ($sport->getImage() as $image) {
+            foreach ($sport->getImages() as $image) {
                 $imagePath = $this->getParameter('images_directory') . '/' . $image->getImage();
                 if (file_exists($imagePath)) {
                     unlink($imagePath);
@@ -248,7 +248,7 @@ class SportsController extends AbstractController
             }
 
             $imageUrls = [];
-            foreach ($sport->getImage() as $image) {
+            foreach ($sport->getImages() as $image) {
                 $imageUrls[] = $request->getSchemeAndHttpHost() . '/uploads/images/' . $image->getImage();
             }
 
@@ -277,7 +277,7 @@ class SportsController extends AbstractController
 
             foreach ($sports as $sport) {
                 $imageUrls = [];
-                foreach ($sport->getImage() as $image) {
+                foreach ($sport->getImages() as $image) {
                     $imageUrls[] = $request->getSchemeAndHttpHost() . '/uploads/images/' . $image->getImage();
                 }
 

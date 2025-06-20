@@ -82,11 +82,11 @@ class Pictures
     #[ORM\OneToMany(targetEntity: Images::class, mappedBy: 'pictures', cascade: ['persist', 'remove'])]
     #[Groups(['pictures:read', 'pictures:write'])]
     #[ApiProperty(
-        description: 'Images associées à la photo',
+        description: 'Images associées à la photo (tableau base64 pour upload)',
         example: ['data:image/jpeg;base64,...'],
-        required: true
+        required: false
     )]
-    private Collection $image;
+    private Collection $images;
 
     #[ORM\Column(type: 'datetime_immutable')]
     #[Groups(['pictures:read'])]
@@ -100,7 +100,7 @@ class Pictures
 
     public function __construct()
     {
-        $this->image = new ArrayCollection();
+        $this->images = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
     }
 
@@ -134,15 +134,15 @@ class Pictures
     /**
      * @return Collection<int, Images>
      */
-    public function getImage(): Collection
+    public function getImages(): Collection
     {
-        return $this->image;
+        return $this->images;
     }
 
     public function addImage(Images $image): static
     {
-        if (!$this->image->contains($image)) {
-            $this->image->add($image);
+        if (!$this->images->contains($image)) {
+            $this->images->add($image);
             $image->setPictures($this);
         }
         return $this;
@@ -150,7 +150,7 @@ class Pictures
 
     public function removeImage(Images $image): static
     {
-        if ($this->image->removeElement($image)) {
+        if ($this->images->removeElement($image)) {
             if ($image->getPictures() === $this) {
                 $image->setPictures(null);
             }

@@ -60,38 +60,37 @@ class SocialMediasController extends AbstractController
             $socialMedia = new SocialMedias();
             $socialMedia->setPlatform($data['platform']);
             $socialMedia->setUrl($data['url']);
-
+            $socialMedia->setIconUrl('https://cdn-icons-png.flaticon.com/512/7046/7046086.png'); // Valeur par défaut
             $socialMedia->setCreatedAt(new \DateTimeImmutable());
 
-             if(isset($data['iconUrl']))
-            {
+            if(isset($data['iconUrl'])) {
                 $socialMedia->setIconUrl($data['iconUrl']);
             }
             
-            // $iconUrl = null;
-            // if (isset($data['images']) && is_array($data['images']) && !empty($data['images'])) {
-            //     $base64Image = $data['images'][0]; 
-            //     if (strpos($base64Image, 'data:image') === 0) {
-            //         $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64Image));
-            //         $tempFile = tempnam(sys_get_temp_dir(), 'img_');
-            //         file_put_contents($tempFile, $imageData);
+            $iconUrl = null;
+            if (isset($data['images']) && is_array($data['images']) && !empty($data['images'])) {
+                $base64Image = $data['images'][0]; 
+                if (strpos($base64Image, 'data:image') === 0) {
+                    $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64Image));
+                    $tempFile = tempnam(sys_get_temp_dir(), 'img_');
+                    file_put_contents($tempFile, $imageData);
                     
-            //         $mimeType = mime_content_type($tempFile);
-            //         $extension = explode('/', $mimeType)[1];
+                    $mimeType = mime_content_type($tempFile);
+                    $extension = explode('/', $mimeType)[1];
                     
-            //         $imageFile = new \Symfony\Component\HttpFoundation\File\UploadedFile(
-            //             $tempFile,
-            //             'image.' . $extension,
-            //             $mimeType,
-            //             null,
-            //             true
-            //         );
+                    $imageFile = new \Symfony\Component\HttpFoundation\File\UploadedFile(
+                        $tempFile,
+                        'image.' . $extension,
+                        $mimeType,
+                        null,
+                        true
+                    );
 
-            //         $imagePath = $this->imageUploadService->upload($imageFile, 'social_media');
-            //         $iconUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $imagePath;
-            //         $socialMedia->setIconUrl($iconUrl);
-            //     }
-            // }
+                    $imagePath = $this->imageUploadService->upload($imageFile, 'social_media');
+                    $iconUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $imagePath;
+                    $socialMedia->setIconUrl($iconUrl);
+                }
+            }
 
             $this->entityManager->persist($socialMedia);
             $this->entityManager->flush();
@@ -100,7 +99,9 @@ class SocialMediasController extends AbstractController
                 'id' => $socialMedia->getId(),
                 'platform' => $socialMedia->getPlatform(),
                 'url' => $socialMedia->getUrl(),
-                'iconUrl' => $socialMedia->getIconUrl(),
+
+                'images' => $iconUrl ? [$iconUrl] : [],
+
                 'created_at' => $socialMedia->getCreatedAt()->format('d/m/Y H:i')
             ];
 
@@ -139,30 +140,30 @@ class SocialMediasController extends AbstractController
                 $socialMedia->setIconUrl($data['iconUrl']);
             }
             
-            // $iconUrl = null;
-            // if (isset($data['images']) && is_array($data['images']) && !empty($data['images'])) {
-            //     $base64Image = $data['images'][0];
-            //     if (strpos($base64Image, 'data:image') === 0) {
-            //         $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64Image));
-            //         $tempFile = tempnam(sys_get_temp_dir(), 'img_');
-            //         file_put_contents($tempFile, $imageData);
+            $iconUrl = null;
+            if (isset($data['images']) && is_array($data['images']) && !empty($data['images'])) {
+                $base64Image = $data['images'][0];
+                if (strpos($base64Image, 'data:image') === 0) {
+                    $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64Image));
+                    $tempFile = tempnam(sys_get_temp_dir(), 'img_');
+                    file_put_contents($tempFile, $imageData);
                     
-            //         $mimeType = mime_content_type($tempFile);
-            //         $extension = explode('/', $mimeType)[1];
+                    $mimeType = mime_content_type($tempFile);
+                    $extension = explode('/', $mimeType)[1];
                     
-            //         $imageFile = new \Symfony\Component\HttpFoundation\File\UploadedFile(
-            //             $tempFile,
-            //             'image.' . $extension,
-            //             $mimeType,
-            //             null,
-            //             true
-            //         );
+                    $imageFile = new \Symfony\Component\HttpFoundation\File\UploadedFile(
+                        $tempFile,
+                        'image.' . $extension,
+                        $mimeType,
+                        null,
+                        true
+                    );
 
-            //         $imagePath = $this->imageUploadService->upload($imageFile, 'social_media');
-            //         $iconUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $imagePath;
-            //         $socialMedia->setIconUrl($iconUrl);
-            //     }
-            // }
+                    $imagePath = $this->imageUploadService->upload($imageFile, 'social_media');
+                    $iconUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $imagePath;
+                    $socialMedia->setIconUrl($iconUrl);
+                }
+            }
 
             $this->entityManager->flush();
 
@@ -170,7 +171,8 @@ class SocialMediasController extends AbstractController
                 'id' => $socialMedia->getId(),
                 'platform' => $socialMedia->getPlatform(),
                 'url' => $socialMedia->getUrl(),
-                'iconUrl' => $socialMedia->getIconUrl()
+                'images' => $iconUrl ? [$iconUrl] : ($socialMedia->getIconUrl() ? [$socialMedia->getIconUrl()] : [])
+
             ];
 
             return new JsonResponse($response, Response::HTTP_OK);

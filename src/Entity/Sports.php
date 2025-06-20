@@ -110,14 +110,14 @@ class Sports
         description: 'Images associées au sport',
         example: ['data:image/jpeg;base64,...']
     )]
-    private Collection $image;
+    private Collection $images;
 
     public function __construct()
     {
         $this->teams = new ArrayCollection();
         $this->events = new ArrayCollection();
         $this->recurringSchedules = new ArrayCollection();
-        $this->image = new ArrayCollection();
+        $this->images = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -252,15 +252,15 @@ class Sports
     /**
      * @return Collection<int, images>
      */
-    public function getImage(): Collection
+    public function getImages(): Collection
     {
-        return $this->image;
+        return $this->images;
     }
 
     public function addImage(images $image): static
     {
-        if (!$this->image->contains($image)) {
-            $this->image->add($image);
+        if (!$this->images->contains($image)) {
+            $this->images->add($image);
             $image->setSports($this);
         }
 
@@ -269,7 +269,7 @@ class Sports
 
     public function removeImage(images $image): static
     {
-        if ($this->image->removeElement($image)) {
+        if ($this->images->removeElement($image)) {
             if ($image->getSports() === $this) {
                 $image->setSports(null);
             }
