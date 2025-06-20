@@ -86,15 +86,15 @@ class NewsController extends AbstractController
         try {
             $data = json_decode($request->getContent(), true);
 
-            if (!isset($data['title']) || !isset($data['description'])) {
+            if (!isset($data['title']) || !isset($data['content'])) {
                 return $this->json([
-                    'error' => 'Title and description are required'
+                    'error' => 'Title and content are required'
                 ], Response::HTTP_BAD_REQUEST);
             }
 
             $news = new News();
             $news->setTitle($data['title']);
-            $news->setContent($data['description']);
+            $news->setContent($data['content']);
             $news->setCreatedAt(new \DateTimeImmutable());
             $news->setPublishedAt(new \DateTime());
             $news->setUpdatedAt(new \DateTimeImmutable());
@@ -271,7 +271,7 @@ class NewsController extends AbstractController
 
             $imageUrl = null;
 
-            if (isset($data['images']) && is_array($data['images']) && !empty($data['images'])) {
+            if (isset($data['images']) && is_array($data['images'])  && !empty($data['images'])) {
                 $oldImages = $news->getImages();
                 foreach ($oldImages as $oldImage) {
                     $oldPath = $this->getParameter('images_directory') . '/' . $oldImage->getImage();
@@ -281,6 +281,18 @@ class NewsController extends AbstractController
                     $entityManager->remove($oldImage);
                 }
 
+                $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $data['images'][0]));
+                
+                $tempFile = tempnam(sys_get_temp_dir(), 'news_image_');
+                file_put_contents($tempFile, $imageData);
+                
+                $imageFile = new \Symfony\Component\HttpFoundation\File\UploadedFile(
+                    $tempFile,
+                    'image.jpg',
+                    'image/jpeg',
+                    null,
+                    true
+                );
                 $imageData = $data['images'][0];
                 if (strpos($imageData, 'data:image') === 0) {
                     list($type, $imageData) = explode(';', $imageData);

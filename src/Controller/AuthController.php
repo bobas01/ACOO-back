@@ -47,9 +47,9 @@ class AuthController extends AbstractController
         $expiresAt = (new \DateTimeImmutable())->modify("+{$tokenTtl} seconds")->getTimestamp();
 
         return $this->json([
+            'id' => $admin->getId(),
             'username' => $admin->getUsername(),
             'email' => $admin->getEmail(),
-            'roles' => ['ROLE_ADMIN'],
             'tokenData' => [
                 'expires_at' => $expiresAt,
                 'token' => $token,

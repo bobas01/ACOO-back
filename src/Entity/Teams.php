@@ -70,18 +70,18 @@ class Teams
     #[ORM\ManyToOne(inversedBy: 'teams')]
     #[Groups(['teams:read', 'teams:write'])]
     #[ApiProperty(
-        description: 'Sport pratiqué par l\'équipe',
+        description: 'Id du Sport pratiqué par l\'équipe',
         example: 1,
         required: true
     )]
-    private ?Sports $id_sport = null;
+    private ?Sports $sport = null;
 
     /**
      * @var Collection<int, Events>
      */
     #[ORM\ManyToMany(targetEntity: Events::class, mappedBy: 'teams')]
     #[Groups(['teams:read'])]
-    #[ApiProperty(description: 'Événements auxquels l\'équipe participe')]
+    #[ApiProperty(description: 'Id des événements associés à l\'équipe')]
     private Collection $events;
 
     /**
@@ -95,13 +95,13 @@ class Teams
     #[Groups(['teams:read', 'teams:write'])]
     private ?string $role = null;
 
-    #[ORM\OneToMany(targetEntity: Images::class, mappedBy: 'teams')]
-    #[Groups(['teams:read', 'teams:write'])]
-    #[ApiProperty(
-        description: 'Images associées à l\'équipe',
-        example: ['data:image/jpeg;base64,...']
-    )]
-    private Collection $image;
+#[ORM\OneToMany(targetEntity: Images::class, mappedBy: 'teams')]
+#[Groups(['teams:read', 'teams:write'])]
+#[ApiProperty(
+    description: 'Images associées à l\'équipe',
+    example: ['data:image/jpeg;base64,...']
+)]
+private Collection $images;
 
     /**
      * @var Collection<int, Staffs>
@@ -113,7 +113,7 @@ class Teams
     {
         $this->events = new ArrayCollection();
         $this->recurringSchedules = new ArrayCollection();
-        $this->image = new ArrayCollection();
+        $this->images = new ArrayCollection();
         $this->staffs = new ArrayCollection();
     }
 
@@ -137,12 +137,12 @@ class Teams
 
     public function getSport(): ?Sports
     {
-        return $this->id_sport;
+        return $this->sport;
     }
 
     public function setSport(?Sports $sport): static
     {
-        $this->id_sport = $sport;
+        $this->sport = $sport;
         return $this;
     }
 
@@ -214,13 +214,13 @@ class Teams
      */
     public function getImages(): Collection
     {
-        return $this->image;
+        return $this->images;
     }
 
     public function addImage(Images $image): static
     {
-        if (!$this->image->contains($image)) {
-            $this->image->add($image);
+        if (!$this->images->contains($image)) {
+            $this->images->add($image);
             $image->setTeams($this);
         }
         return $this;
@@ -228,7 +228,7 @@ class Teams
 
     public function removeImage(Images $image): static
     {
-        if ($this->image->removeElement($image)) {
+        if ($this->images->removeElement($image)) {
             if ($image->getTeams() === $this) {
                 $image->setTeams(null);
             }

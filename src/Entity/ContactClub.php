@@ -5,8 +5,6 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\ApiProperty;
 use App\Repository\ContactClubRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
@@ -28,11 +26,11 @@ class ContactClub
     #[ORM\Column(length: 255)]
     #[Groups(['contact_club:read', 'contact_club:write'])]
     #[ApiProperty(
-        description: 'Nom du contact',
-        example: 'John Doe',
+        description: 'Numéro de téléphone du contact',
+        example: '+33123456789',
         required: true
     )]
-    private ?string $name = null;
+    private ?string $phoneNumber = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['contact_club:read', 'contact_club:write'])]
@@ -41,117 +39,54 @@ class ContactClub
         example: 'contact@example.com',
         required: true
     )]
-    private ?string $email = null;
+    private ?string $mail = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['contact_club:read', 'contact_club:write'])]
     #[ApiProperty(
-        description: 'Numéro de téléphone du contact',
-        example: '+33123456789',
+        description: 'Adresse du contact',
+        example: '12 rue de Paris, 75000 Paris',
         required: true
     )]
-    private ?string $phone = null;
-
-    #[ORM\Column(length: 255)]
-    #[Groups(['contact_club:read', 'contact_club:write'])]
-    #[ApiProperty(
-        description: 'Fonction du contact',
-        example: 'Président',
-        required: true
-    )]
-    private ?string $function = null;
-
-    #[ORM\OneToMany(targetEntity: Images::class, mappedBy: 'contactClub')]
-    #[Groups(['contact_club:read', 'contact_club:write'])]
-    #[ApiProperty(
-        description: 'Photo du contact',
-        example: ['data:image/jpeg;base64,...']
-    )]
-    private Collection $image;
-
-    #[ORM\Column(type: 'datetime_immutable')]
-    #[Groups(['contact_club:read'])]
-    #[ApiProperty(description: 'Date de création du contact')]
-    private ?\DateTimeImmutable $createdAt = null;
-
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
-    #[Groups(['contact_club:read'])]
-    #[ApiProperty(description: 'Date de dernière mise à jour du contact')]
-    private ?\DateTimeImmutable $updatedAt = null;
+    private ?string $address = null;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getName(): ?string
+    public function getPhoneNumber(): ?string
     {
-        return $this->name;
+        return $this->phoneNumber;
     }
 
-    public function setName(string $name): static
+    public function setPhoneNumber(string $phoneNumber): static
     {
-        $this->name = $name;
+        $this->phoneNumber = $phoneNumber;
 
         return $this;
     }
 
-    public function getEmail(): ?string
+    public function getMail(): ?string
     {
-        return $this->email;
+        return $this->mail;
     }
 
-    public function setEmail(string $email): static
+    public function setMail(string $mail): static
     {
-        $this->email = $email;
+        $this->mail = $mail;
 
         return $this;
     }
 
-    public function getPhone(): ?string
+    public function getAddress(): ?string
     {
-        return $this->phone;
+        return $this->address;
     }
 
-    public function setPhone(string $phone): static
+    public function setAddress(string $address): static
     {
-        $this->phone = $phone;
-
-        return $this;
-    }
-
-    public function getFunction(): ?string
-    {
-        return $this->function;
-    }
-
-    public function setFunction(string $function): static
-    {
-        $this->function = $function;
-
-        return $this;
-    }
-
-    public function getCreatedAt(): ?\DateTimeImmutable
-    {
-        return $this->createdAt;
-    }
-
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
-    }
-
-    public function getUpdatedAt(): ?\DateTimeImmutable
-    {
-        return $this->updatedAt;
-    }
-
-    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
-    {
-        $this->updatedAt = $updatedAt;
+        $this->address = $address;
 
         return $this;
     }

@@ -82,7 +82,7 @@ class IntroductionController extends AbstractController
                     'id' => $introduction->getId(),
                     'title' => $introduction->getTitle(),
                     'description' => $introduction->getDescription(),
-                    'images' => $imageUrls
+                    'image' => $imageUrls[0]
                 ]
             ], Response::HTTP_CREATED);
         } catch (\Exception $e) {
@@ -174,7 +174,7 @@ class IntroductionController extends AbstractController
                     'id' => $introduction->getId(),
                     'title' => $introduction->getTitle(),
                     'description' => $introduction->getDescription(),
-                    'images' => $imageUrls
+                    'image' => $imageUrls[0]
                 ]
             ], Response::HTTP_OK);
         } catch (\Exception $e) {
