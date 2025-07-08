@@ -39,6 +39,9 @@ security:
     - { path: ^/api/login, roles: PUBLIC_ACCESS, methods: [POST]}
     - { path: ^/api/contact$, roles: PUBLIC_ACCESS, methods: [POST]}
     - { path: ^/api/contact$, roles: IS_AUTHENTICATED_FULLY, methods: [GET]}
+    - { path: ^/api/admin/register, roles: PUBLIC_ACCESS, methods: [POST]}
+    - { path: ^/api/admin/forgot-password, roles: PUBLIC_ACCESS, methods: [POST]}
+    - { path: ^/api/admin/reset-password, roles: PUBLIC_ACCESS, methods: [POST]}
 
     - { path: ^/api/docs, roles: PUBLIC_ACCESS }
     - { path: ^/api/docs.json, roles: PUBLIC_ACCESS }

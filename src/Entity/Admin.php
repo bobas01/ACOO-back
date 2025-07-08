@@ -23,6 +23,22 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Table(name: '`admin`')]
 #[ApiResource(
     operations: [
+        new Post(
+            uriTemplate: '/admin/register',
+            controller: RegisterController::class . '::register',
+            deserialize: false,
+            denormalizationContext: ['groups' => ['admin:write']]
+        ),
+        new Post(
+            uriTemplate: '/admin/forgot-password',
+            controller: AuthController::class . '::forgotPassword',
+            deserialize: false
+        ),
+        new Post(
+            uriTemplate: '/admin/reset-password',
+            controller: AuthController::class . '::resetPassword',
+            deserialize: false
+        ),
         new Get(
             uriTemplate: '/admin/{id}',
             controller: AuthController::class . '::show',
@@ -34,12 +50,6 @@ use Symfony\Component\Validator\Constraints as Assert;
             normalizationContext: ['groups' => ['admin:read']]
         ),
         new Post(
-            uriTemplate: '/admin/register',
-            controller: RegisterController::class . '::register',
-            deserialize: false,
-            denormalizationContext: ['groups' => ['admin:write']]
-        ),
-        new Post(
             uriTemplate: '/admin/login',
             controller: AuthController::class . '::login',
             deserialize: false
@@ -48,7 +58,8 @@ use Symfony\Component\Validator\Constraints as Assert;
             uriTemplate: '/admin/{id}',
             controller: AuthController::class . '::update',
             deserialize: false,
-            denormalizationContext: ['groups' => ['admin:write']]
+            denormalizationContext: ['groups' => ['admin:write']],
+            normalizationContext: ['groups' => ['admin:read']]
         ),
         new Delete(
             uriTemplate: '/admin/{id}',
@@ -57,6 +68,11 @@ use Symfony\Component\Validator\Constraints as Assert;
     ],
     formats: ['json', 'multipart' => ['multipart/form-data']]
 )]
+/**
+ * Endpoints complémentaires :
+ * POST /admin/forgot-password : { email } → génère un token de reset
+ * POST /admin/reset-password : { token, password } → réinitialise le mot de passe
+ */
 class Admin implements UserInterface, PasswordAuthenticatedUserInterface
 {
 
@@ -83,6 +99,9 @@ private ?string $email = null;
 #[Assert\Length(min: 12)]
 #[Groups(['admin:write'])]
 private ?string $password = null;
+
+#[ORM\Column(type: 'string', length: 255, nullable: true)]
+private ?string $resetToken = null;
 
     /**
      * @var Collection<int, News>
@@ -133,6 +152,17 @@ private ?string $password = null;
     {
         $this->password = $password;
 
+        return $this;
+    }
+
+    public function getResetToken(): ?string
+    {
+        return $this->resetToken;
+    }
+
+    public function setResetToken(?string $resetToken): static
+    {
+        $this->resetToken = $resetToken;
         return $this;
     }
 

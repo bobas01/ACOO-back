@@ -34,7 +34,7 @@ class GalleryController extends AbstractController
                 $pictures = [];
                 foreach ($gallery->getPictures() as $picture) {
                     $imageUrl = null;
-                    $image = $picture->getImage()->first();
+                    $image = $picture->getImages()->first();
                     if ($image) {
                         $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $image->getImage();
                     }
@@ -79,7 +79,7 @@ class GalleryController extends AbstractController
             $pictures = [];
             foreach ($gallery->getPictures() as $picture) {
                 $imageUrl = null;
-                $image = $picture->getImage()->first();
+                $image = $picture->getImages()->first();
                 if ($image) {
                     $imageUrl = $request->getSchemeAndHttpHost() . '/uploads/images/' . $image->getImage();
                 }

@@ -85,21 +85,51 @@ class AuthController extends AbstractController
             return $this->json(['message' => 'Administrateur non trouvé'], Response::HTTP_NOT_FOUND);
         }
 
+        // Vérification de l'identité : seul l'admin connecté peut modifier son profil
+        $user = $this->getUser();
+        if (!$user instanceof Admin || $user->getId() !== $admin->getId()) {
+            return $this->json(['message' => 'Accès refusé'], Response::HTTP_FORBIDDEN);
+        }
+
         $data = json_decode($request->getContent(), true);
-        
         if (isset($data['username'])) {
             $admin->setUsername($data['username']);
         }
         if (isset($data['email'])) {
             $admin->setEmail($data['email']);
         }
+        // Changement de mot de passe sécurisé
         if (isset($data['password'])) {
-            $hashedPassword = $this->passwordHasher->hashPassword($admin, $data['password']);
+            if (!isset($data['oldPassword'])) {
+                return $this->json(['message' => 'L\'ancien mot de passe est requis pour changer le mot de passe'], Response::HTTP_BAD_REQUEST);
+            }
+            if (!$this->passwordHasher->isPasswordValid($admin, $data['oldPassword'])) {
+                return $this->json(['message' => 'Ancien mot de passe incorrect'], Response::HTTP_BAD_REQUEST);
+            }
+            $password = $data['password'];
+            $passwordErrors = [];
+            if (strlen($password) < 12) {
+                $passwordErrors[] = 'Le mot de passe doit contenir au moins 12 caractères.';
+            }
+            if (!preg_match('/[A-Z]/', $password)) {
+                $passwordErrors[] = 'Le mot de passe doit contenir au moins une majuscule.';
+            }
+            if (!preg_match('/[a-z]/', $password)) {
+                $passwordErrors[] = 'Le mot de passe doit contenir au moins une minuscule.';
+            }
+            if (!preg_match('/[0-9]/', $password)) {
+                $passwordErrors[] = 'Le mot de passe doit contenir au moins un chiffre.';
+            }
+            if (!preg_match('/[\W_]/', $password)) {
+                $passwordErrors[] = 'Le mot de passe doit contenir au moins un caractère spécial.';
+            }
+            if (!empty($passwordErrors)) {
+                return $this->json(['errors' => $passwordErrors], Response::HTTP_BAD_REQUEST);
+            }
+            $hashedPassword = $this->passwordHasher->hashPassword($admin, $password);
             $admin->setPassword($hashedPassword);
         }
-
         $this->entityManager->flush();
-
         $responseData = $this->serializer->serialize($admin, 'json', ['groups' => 'admin:read']);
         return new Response($responseData, Response::HTTP_OK, ['Content-Type' => 'application/json']);
     }
@@ -116,5 +146,62 @@ class AuthController extends AbstractController
         $this->entityManager->flush();
 
         return $this->json(['message' => 'Administrateur supprimé avec succès'], Response::HTTP_OK);
+    }
+
+    #[Route('/admin/forgot-password', name: 'app_admin_forgot_password', methods: ['POST'])]
+    public function forgotPassword(Request $request): Response
+    {
+        $data = json_decode($request->getContent(), true);
+        if (!isset($data['email'])) {
+            return $this->json(['message' => 'Email requis'], Response::HTTP_BAD_REQUEST);
+        }
+        $admin = $this->entityManager->getRepository(Admin::class)->findOneBy(['email' => $data['email']]);
+        if (!$admin) {
+            return $this->json(['message' => 'Aucun administrateur trouvé avec cet email'], Response::HTTP_NOT_FOUND);
+        }
+        $token = bin2hex(random_bytes(32));
+        $admin->setResetToken($token);
+        $this->entityManager->flush();
+        // Ici, on pourrait envoyer le token par email. Pour test, on le retourne.
+        return $this->json(['message' => 'Un email de réinitialisation a été envoyé (token retourné pour test)', 'resetToken' => $token], Response::HTTP_OK);
+    }
+
+    #[Route('/admin/reset-password', name: 'app_admin_reset_password', methods: ['POST'])]
+    public function resetPassword(Request $request): Response
+    {
+        $data = json_decode($request->getContent(), true);
+        if (!isset($data['token'], $data['password'])) {
+            return $this->json(['message' => 'Token et nouveau mot de passe requis'], Response::HTTP_BAD_REQUEST);
+        }
+        $admin = $this->entityManager->getRepository(Admin::class)->findOneBy(['resetToken' => $data['token']]);
+        if (!$admin) {
+            return $this->json(['message' => 'Token invalide'], Response::HTTP_BAD_REQUEST);
+        }
+        // Vérification de la robustesse du mot de passe (mêmes règles que register)
+        $password = $data['password'];
+        $passwordErrors = [];
+        if (strlen($password) < 12) {
+            $passwordErrors[] = 'Le mot de passe doit contenir au moins 12 caractères.';
+        }
+        if (!preg_match('/[A-Z]/', $password)) {
+            $passwordErrors[] = 'Le mot de passe doit contenir au moins une majuscule.';
+        }
+        if (!preg_match('/[a-z]/', $password)) {
+            $passwordErrors[] = 'Le mot de passe doit contenir au moins une minuscule.';
+        }
+        if (!preg_match('/[0-9]/', $password)) {
+            $passwordErrors[] = 'Le mot de passe doit contenir au moins un chiffre.';
+        }
+        if (!preg_match('/[\W_]/', $password)) {
+            $passwordErrors[] = 'Le mot de passe doit contenir au moins un caractère spécial.';
+        }
+        if (!empty($passwordErrors)) {
+            return $this->json(['errors' => $passwordErrors], Response::HTTP_BAD_REQUEST);
+        }
+        $hashedPassword = $this->passwordHasher->hashPassword($admin, $password);
+        $admin->setPassword($hashedPassword);
+        $admin->setResetToken(null);
+        $this->entityManager->flush();
+        return $this->json(['message' => 'Mot de passe réinitialisé avec succès'], Response::HTTP_OK);
     }
 } 
