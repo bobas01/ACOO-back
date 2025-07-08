@@ -56,12 +56,44 @@ class Video
 
     #[ORM\Column(type: 'string', length: 255)]
     #[Groups(['video:read', 'video:write'])]
+    #[ApiProperty(description: 'Nom ou titre de la vidéo')]
+    private string $name;
+
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    #[Groups(['video:read', 'video:write'])]
+    #[ApiProperty(description: 'Indique si la vidéo est sélectionnée pour le hero', example: false)]
+    private bool $highlighting = false;
+
+    #[ORM\Column(type: 'string', length: 255)]
+    #[Groups(['video:read', 'video:write'])]
     #[ApiProperty(description: 'URL de la vidéo')]
     private string $videoUrl;
 
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function setName(string $name): self
+    {
+        $this->name = $name;
+        return $this;
+    }
+
+    public function isHighlighting(): bool
+    {
+        return $this->highlighting;
+    }
+
+    public function setHighlighting(bool $highlighting): self
+    {
+        $this->highlighting = $highlighting;
+        return $this;
     }
 
     public function getVideoUrl(): string

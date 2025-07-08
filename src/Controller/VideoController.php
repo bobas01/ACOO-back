@@ -51,33 +51,65 @@ class VideoController extends AbstractController
     public function create(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        if (!isset($data['videoUrl']) || empty($data['videoUrl'])) {
-            return new JsonResponse(['message' => 'Le champ videoUrl est requis'], Response::HTTP_BAD_REQUEST);
+        if (!isset($data['videoUrl']) || empty($data['videoUrl']) || !isset($data['name']) || empty($data['name'])) {
+            return new JsonResponse(['message' => 'Les champs videoUrl et name sont requis'], Response::HTTP_BAD_REQUEST);
+        }
+        $highlighting = isset($data['highlighting']) ? (bool)$data['highlighting'] : false;
+        if ($highlighting) {
+            // Mettre highlighting à false sur toutes les autres vidéos
+            $allVideos = $this->entityManager->getRepository(Video::class)->findAll();
+            foreach ($allVideos as $v) {
+                $v->setHighlighting(false);
+            }
         }
         $video = $this->entityManager->getRepository(Video::class)->findOneBy([]);
         if (!$video) {
             $video = new Video();
         }
         $video->setVideoUrl($data['videoUrl']);
+        $video->setName($data['name']);
+        $video->setHighlighting($highlighting);
         $this->entityManager->persist($video);
         $this->entityManager->flush();
-        return new JsonResponse(['videoUrl' => $video->getVideoUrl()], Response::HTTP_CREATED);
+        return new JsonResponse([
+            'id' => $video->getId(),
+            'name' => $video->getName(),
+            'videoUrl' => $video->getVideoUrl(),
+            'highlighting' => $video->isHighlighting()
+        ], Response::HTTP_CREATED);
     }
 
     #[Route('/{id}', name: 'app_video_update_item', methods: ['POST'])]
     public function update(Request $request, $id): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        if (!isset($data['videoUrl']) || empty($data['videoUrl'])) {
-            return new JsonResponse(['message' => 'Le champ videoUrl est requis'], Response::HTTP_BAD_REQUEST);
+        if (!isset($data['videoUrl']) || empty($data['videoUrl']) || !isset($data['name']) || empty($data['name'])) {
+            return new JsonResponse(['message' => 'Les champs videoUrl et name sont requis'], Response::HTTP_BAD_REQUEST);
         }
+        $highlighting = isset($data['highlighting']) ? (bool)$data['highlighting'] : false;
         $video = $this->entityManager->getRepository(Video::class)->find($id);
         if (!$video) {
             return new JsonResponse(['message' => 'Vidéo non trouvée'], Response::HTTP_NOT_FOUND);
         }
+        if ($highlighting) {
+            // Mettre highlighting à false sur toutes les autres vidéos
+            $allVideos = $this->entityManager->getRepository(Video::class)->findAll();
+            foreach ($allVideos as $v) {
+                if ($v->getId() !== $video->getId()) {
+                    $v->setHighlighting(false);
+                }
+            }
+        }
         $video->setVideoUrl($data['videoUrl']);
+        $video->setName($data['name']);
+        $video->setHighlighting($highlighting);
         $this->entityManager->flush();
-        return new JsonResponse(['videoUrl' => $video->getVideoUrl()], Response::HTTP_OK);
+        return new JsonResponse([
+            'id' => $video->getId(),
+            'name' => $video->getName(),
+            'videoUrl' => $video->getVideoUrl(),
+            'highlighting' => $video->isHighlighting()
+        ], Response::HTTP_OK);
     }
 
     public function getAll(): JsonResponse
@@ -87,7 +119,9 @@ class VideoController extends AbstractController
         foreach ($videos as $video) {
             $data[] = [
                 'id' => $video->getId(),
-                'videoUrl' => $video->getVideoUrl()
+                'name' => $video->getName(),
+                'videoUrl' => $video->getVideoUrl(),
+                'highlighting' => $video->isHighlighting()
             ];
         }
         return new JsonResponse($data, Response::HTTP_OK);
@@ -101,7 +135,9 @@ class VideoController extends AbstractController
         }
         return new JsonResponse([
             'id' => $video->getId(),
-            'videoUrl' => $video->getVideoUrl()
+            'name' => $video->getName(),
+            'videoUrl' => $video->getVideoUrl(),
+            'highlighting' => $video->isHighlighting()
         ], Response::HTTP_OK);
     }
 
