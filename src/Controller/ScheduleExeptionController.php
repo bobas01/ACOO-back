@@ -16,14 +16,32 @@ use Symfony\Component\Serializer\SerializerInterface;
 #[Route('/schedule-exceptions')]
 class ScheduleExeptionController extends AbstractController
 {
-    #[Route('', name: 'app_schedule_exeption_index', methods: ['GET'])]
-    public function index(ScheduleExeptionRepository $scheduleExeptionRepository, SerializerInterface $serializer): JsonResponse
-    {
-        $exeptions = $scheduleExeptionRepository->findAll();
-        $jsonExeptions = $serializer->serialize($exeptions, 'json', ['groups' => 'schedule_exeption:read']);
-        
-        return new JsonResponse($jsonExeptions, Response::HTTP_OK, [], true);
+ 
+#[Route('', name: 'app_schedule_exeption_index', methods: ['GET'])]
+public function index(ScheduleExeptionRepository $scheduleExeptionRepository): JsonResponse
+{
+    $exeptions = $scheduleExeptionRepository->findAll();
+    $data = [];
+    
+    foreach ($exeptions as $exeption) {
+        $data[] = [
+            'id' => $exeption->getId(),
+            'recurring_schedule' => $exeption->getRecurringSchedule() ? [
+                'id' => $exeption->getRecurringSchedule()->getId(),
+                'title' => $exeption->getRecurringSchedule()->getTitle()
+            ] : null,
+            'date' => $exeption->getDate() ? $exeption->getDate()->format('Y-m-d\TH:i:sP') : null,
+            'startTime' => $exeption->getStartTime() ? $exeption->getStartTime()->format('Y-m-d\TH:i:sP') : null,
+            'endTime' => $exeption->getEndTime() ? $exeption->getEndTime()->format('Y-m-d\TH:i:sP') : null,
+            'location' => $exeption->getLocation(),
+            'reason' => $exeption->getReason(),
+            'createdAt' => $exeption->getCreatedAt() ? $exeption->getCreatedAt()->format('Y-m-d\TH:i:sP') : null,
+            'updatedAt' => $exeption->getUpdatedAt() ? $exeption->getUpdatedAt()->format('Y-m-d\TH:i:sP') : null
+        ];
     }
+    
+    return new JsonResponse($data, Response::HTTP_OK);
+}
 
     #[Route('/{id}', name: 'app_schedule_exeption_show', methods: ['GET'])]
     public function show(ScheduleExeption $scheduleExeption, SerializerInterface $serializer): JsonResponse
@@ -46,7 +64,7 @@ class ScheduleExeptionController extends AbstractController
             $exeption = new ScheduleExeption();
             
             if (isset($data['exeption_date'])) {
-                $exeptionDate = \DateTime::createFromFormat('d/m/Y H:i', $data['exeption_date']);
+                $exeptionDate = \DateTime::createFromFormat('d/m/Y', $data['exeption_date']);
                 if (!$exeptionDate) {
                     return new JsonResponse(['error' => 'Format de date exeption_date invalide. Utilisez JJ/MM/AAAA HH:mm'], Response::HTTP_BAD_REQUEST);
                 }
@@ -54,20 +72,24 @@ class ScheduleExeptionController extends AbstractController
             }
 
             if (isset($data['start_time'])) {
-                $startTime = \DateTime::createFromFormat('d/m/Y H:i', $data['start_time']);
+                $startTime = \DateTime::createFromFormat('H:i', $data['start_time']);
                 if (!$startTime) {
-                    return new JsonResponse(['error' => 'Format de date start_time invalide. Utilisez JJ/MM/AAAA HH:mm'], Response::HTTP_BAD_REQUEST);
+                    return new JsonResponse(['error' => 'Format de date start_time invalide. Utilisez  HH:mm'], Response::HTTP_BAD_REQUEST);
                 }
                 $exeption->setStartTime($startTime);
             }
 
             if (isset($data['end_time'])) {
-                $endTime = \DateTime::createFromFormat('d/m/Y H:i', $data['end_time']);
+                $endTime = \DateTime::createFromFormat('H:i', $data['end_time']);
                 if (!$endTime) {
-                    return new JsonResponse(['error' => 'Format de date end_time invalide. Utilisez JJ/MM/AAAA HH:mm'], Response::HTTP_BAD_REQUEST);
+                    return new JsonResponse(['error' => 'Format de date end_time invalide. Utilisez HH:mm'], Response::HTTP_BAD_REQUEST);
                 }
                 $exeption->setEndTime($endTime);
             }
+
+ 
+
+
 
             if (isset($data['location'])) $exeption->setLocation($data['location']);
             if (isset($data['is_cancelled'])) $exeption->setIsCancelled($data['is_cancelled']);
