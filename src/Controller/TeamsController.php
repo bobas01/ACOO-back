@@ -43,7 +43,10 @@ foreach ($teams as $team) {
         'id' => $team->getId(),
         'name' => $team->getName(),
         'role' => $team->getRole(),
-        'sport' => $team->getSport() ? $team->getSport()->getId() : null,
+        'sport' => $team->getSport() ? [
+            'id' => $team->getSport()->getId(),
+            'name' => $team->getSport()->getName()
+        ] : null,
         'images' => $imagesUrls,
         'events' => $team->getEvents()->map(fn($event) => $event->getId())->toArray(),
         'recurringSchedules' => $team->getRecurringSchedules()->map(fn($rs) => $rs->getId())->toArray(),
@@ -69,7 +72,10 @@ public function show(int $id, Request $request): JsonResponse
         'id' => $team->getId(),
         'name' => $team->getName(),
         'role' => $team->getRole(),
-        'sport' => $team->getSport() ? $team->getSport()->getId() : null,
+        'sport' => $team->getSport() ? [
+            'id' => $team->getSport()->getId(),
+            'name' => $team->getSport()->getName()
+        ] : null,
         'images' => $imagesUrls,
         'events' => $team->getEvents()->map(fn($event) => $event->getId())->toArray(),
         'recurringSchedules' => $team->getRecurringSchedules()->map(fn($rs) => $rs->getId())->toArray(),
