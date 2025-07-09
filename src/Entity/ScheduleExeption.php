@@ -55,8 +55,8 @@ class ScheduleExeption
     #[ApiProperty(description: 'Identifiant unique de l\'exception')]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'scheduleExeptions')]
-    #[Groups(['schedule_exeption:read', 'schedule_exeption:write'])]
+    #[ORM\ManyToOne(inversedBy: 'scheduleExeptions', targetEntity: RecurringSchedule::class)]
+    #[Groups(['schedule_exeption:read', 'schedule_exeption:write', 'recurring_schedule:read'])]
     #[ApiProperty(
         description: 'Planning récurrent concerné',
         example: 1,
