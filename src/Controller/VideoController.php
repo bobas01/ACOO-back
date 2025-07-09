@@ -62,10 +62,8 @@ class VideoController extends AbstractController
                 $v->setHighlighting(false);
             }
         }
-        $video = $this->entityManager->getRepository(Video::class)->findOneBy([]);
-        if (!$video) {
-            $video = new Video();
-        }
+        // Toujours créer une nouvelle vidéo
+        $video = new Video();
         $video->setVideoUrl($data['videoUrl']);
         $video->setName($data['name']);
         $video->setHighlighting($highlighting);
