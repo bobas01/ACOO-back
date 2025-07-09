@@ -197,9 +197,12 @@ class PartnersController extends AbstractController
             if (isset($data['images']) && is_array($data['images']) && !empty($data['images'])) {
                 
                 foreach ($partner->getImage() as $oldImage) {
-                    $oldImagePath = $this->getParameter('images_directory') . '/' . $oldImage->getImage();
-                    if (file_exists($oldImagePath)) {
-                        unlink($oldImagePath);
+                    $imageName = $oldImage->getImage();
+                    if ($imageName) {
+                        $oldImagePath = $this->getParameter('images_directory') . '/' . $imageName;
+                        if (is_file($oldImagePath)) {
+                            unlink($oldImagePath);
+                        }
                     }
                     $partner->removeImage($oldImage);
                 }

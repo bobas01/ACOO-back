@@ -103,8 +103,7 @@ private ?string $password = null;
 #[ORM\Column(type: 'string', length: 255, nullable: true)]
 private ?string $resetToken = null;
 
-#[ORM\Column(type: 'datetime', nullable: true)]
-private ?\DateTime $resetTokenExpiresAt = null;
+
 
     /**
      * @var Collection<int, News>
@@ -169,22 +168,11 @@ private ?\DateTime $resetTokenExpiresAt = null;
         return $this;
     }
 
-    public function getResetTokenExpiresAt(): ?\DateTime
-    {
-        return $this->resetTokenExpiresAt;
-    }
-
-    public function setResetTokenExpiresAt(?\DateTime $resetTokenExpiresAt): static
-    {
-        $this->resetTokenExpiresAt = $resetTokenExpiresAt;
-        return $this;
-    }
+   
 
     public function isResetTokenValid(): bool
     {
-        return $this->resetToken !== null 
-            && $this->resetTokenExpiresAt !== null 
-            && $this->resetTokenExpiresAt > new \DateTime();
+        return $this->resetToken !== null;
     }
 
     /**
