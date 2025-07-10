@@ -120,7 +120,7 @@ class AuthController extends AbstractController
         $expiresAt->add(new \DateInterval('PT24H')); // 24 heures
         
         $admin->setResetToken($token);
-        $admin->setResetTokenExpiresAt($expiresAt);
+       
         $this->entityManager->flush();
         
         // Envoi de l'email avec le service dédié
