@@ -30,13 +30,13 @@ public function index(ScheduleExeptionRepository $scheduleExeptionRepository): J
                 'id' => $exeption->getRecurringSchedule()->getId(),
                 'title' => $exeption->getRecurringSchedule()->getTitle()
             ] : null,
-            'date' => $exeption->getDate() ? $exeption->getDate()->format('Y-m-d\TH:i:sP') : null,
-            'startTime' => $exeption->getStartTime() ? $exeption->getStartTime()->format('Y-m-d\TH:i:sP') : null,
-            'endTime' => $exeption->getEndTime() ? $exeption->getEndTime()->format('Y-m-d\TH:i:sP') : null,
+            'date' => $exeption->getDate() ? $exeption->getDate()->format('d/m/Y H:i') : null,
+            'startTime' => $exeption->getStartTime() ? $exeption->getStartTime()->format('d/m/Y H:i') : null,
+            'endTime' => $exeption->getEndTime() ? $exeption->getEndTime()->format('d/m/Y H:i') : null,
             'location' => $exeption->getLocation(),
             'reason' => $exeption->getReason(),
-            'createdAt' => $exeption->getCreatedAt() ? $exeption->getCreatedAt()->format('Y-m-d\TH:i:sP') : null,
-            'updatedAt' => $exeption->getUpdatedAt() ? $exeption->getUpdatedAt()->format('Y-m-d\TH:i:sP') : null
+            'createdAt' => $exeption->getCreatedAt() ? $exeption->getCreatedAt()->format('d/m/Y H:i') : null,
+            'updatedAt' => $exeption->getUpdatedAt() ? $exeption->getUpdatedAt()->format('d/m/Y H:i') : null
         ];
     }
     
@@ -64,7 +64,7 @@ public function index(ScheduleExeptionRepository $scheduleExeptionRepository): J
             $exeption = new ScheduleExeption();
             
             if (isset($data['exeption_date'])) {
-                $exeptionDate = \DateTime::createFromFormat('d/m/Y', $data['exeption_date']);
+                $exeptionDate = \DateTime::createFromFormat('d/m/Y H:i', $data['exeption_date']);
                 if (!$exeptionDate) {
                     return new JsonResponse(['error' => 'Format de date exeption_date invalide. Utilisez JJ/MM/AAAA HH:mm'], Response::HTTP_BAD_REQUEST);
                 }
@@ -74,7 +74,7 @@ public function index(ScheduleExeptionRepository $scheduleExeptionRepository): J
             if (isset($data['start_time'])) {
                 $startTime = \DateTime::createFromFormat('H:i', $data['start_time']);
                 if (!$startTime) {
-                    return new JsonResponse(['error' => 'Format de date start_time invalide. Utilisez  HH:mm'], Response::HTTP_BAD_REQUEST);
+                    return new JsonResponse(['error' => 'Format de date start_time invalide. Utilisez HH:mm'], Response::HTTP_BAD_REQUEST);
                 }
                 $exeption->setStartTime($startTime);
             }
@@ -152,17 +152,17 @@ public function index(ScheduleExeptionRepository $scheduleExeptionRepository): J
         }
 
         if (isset($data['start_time'])) {
-            $startTime = \DateTime::createFromFormat('d/m/Y H:i', $data['start_time']);
+            $startTime = \DateTime::createFromFormat('H:i', $data['start_time']);
             if (!$startTime) {
-                return new JsonResponse(['error' => 'Format de date start_time invalide. Utilisez JJ/MM/AAAA HH:mm'], Response::HTTP_BAD_REQUEST);
+                return new JsonResponse(['error' => 'Format de date start_time invalide. Utilisez HH:mm'], Response::HTTP_BAD_REQUEST);
             }
             $scheduleExeption->setStartTime($startTime);
         }
 
         if (isset($data['end_time'])) {
-            $endTime = \DateTime::createFromFormat('d/m/Y H:i', $data['end_time']);
+            $endTime = \DateTime::createFromFormat('H:i', $data['end_time']);
             if (!$endTime) {
-                return new JsonResponse(['error' => 'Format de date end_time invalide. Utilisez JJ/MM/AAAA HH:mm'], Response::HTTP_BAD_REQUEST);
+                return new JsonResponse(['error' => 'Format de date end_time invalide. Utilisez HH:mm'], Response::HTTP_BAD_REQUEST);
             }
             $scheduleExeption->setEndTime($endTime);
         }

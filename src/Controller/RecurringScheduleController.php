@@ -18,18 +18,64 @@ use Symfony\Component\Serializer\SerializerInterface;
 class RecurringScheduleController extends AbstractController
 {
     #[Route('', name: 'app_recurring_schedule_index', methods: ['GET'])]
-    public function getAllRecurringSchedules(RecurringScheduleRepository $recurringScheduleRepository, SerializerInterface $serializer): JsonResponse
+    public function getAllRecurringSchedules(RecurringScheduleRepository $recurringScheduleRepository): JsonResponse
     {
         $schedules = $recurringScheduleRepository->findAll();
-        $jsonSchedules = $serializer->serialize($schedules, 'json', ['groups' => 'recurring_schedule:read']);
-        return new JsonResponse($jsonSchedules, Response::HTTP_OK, [], true);
+        $data = [];
+        
+        foreach ($schedules as $schedule) {
+            $data[] = [
+                'id' => $schedule->getId(),
+                'title' => $schedule->getTitle(),
+                'description' => $schedule->getDescription(),
+                'location' => $schedule->getLocation(),
+                'start_time' => $schedule->getStartTime() ? $schedule->getStartTime()->format('d/m/Y H:i') : null,
+                'duration' => $schedule->getDuration(),
+                'frequency' => $schedule->getFrequency(),
+                'end_date' => $schedule->getEndDate() ? $schedule->getEndDate()->format('d/m/Y H:i') : null,
+                'day_of_week' => $schedule->getDayOfWeek(),
+                'sport' => $schedule->getSport() ? [
+                    'id' => $schedule->getSport()->getId(),
+                    'name' => $schedule->getSport()->getName()
+                ] : null,
+                'team' => $schedule->getTeam() ? [
+                    'id' => $schedule->getTeam()->getId(),
+                    'name' => $schedule->getTeam()->getName()
+                ] : null,
+                'created_at' => $schedule->getCreatedAt() ? $schedule->getCreatedAt()->format('d/m/Y H:i') : null,
+                'updated_at' => $schedule->getUpdatedAt() ? $schedule->getUpdatedAt()->format('d/m/Y H:i') : null
+            ];
+        }
+        
+        return new JsonResponse($data, Response::HTTP_OK);
     }
 
     #[Route('/{id}', name: 'app_recurring_schedule_show', methods: ['GET'])]
-    public function getRecurringSchedule(RecurringSchedule $recurringSchedule, SerializerInterface $serializer): JsonResponse
+    public function getRecurringSchedule(RecurringSchedule $recurringSchedule): JsonResponse
     {
-        $jsonSchedule = $serializer->serialize($recurringSchedule, 'json', ['groups' => 'recurring_schedule:read']);
-        return new JsonResponse($jsonSchedule, Response::HTTP_OK, [], true);
+        $data = [
+            'id' => $recurringSchedule->getId(),
+            'title' => $recurringSchedule->getTitle(),
+            'description' => $recurringSchedule->getDescription(),
+            'location' => $recurringSchedule->getLocation(),
+            'start_time' => $recurringSchedule->getStartTime() ? $recurringSchedule->getStartTime()->format('d/m/Y H:i') : null,
+            'duration' => $recurringSchedule->getDuration(),
+            'frequency' => $recurringSchedule->getFrequency(),
+            'end_date' => $recurringSchedule->getEndDate() ? $recurringSchedule->getEndDate()->format('d/m/Y H:i') : null,
+            'day_of_week' => $recurringSchedule->getDayOfWeek(),
+            'sport' => $recurringSchedule->getSport() ? [
+                'id' => $recurringSchedule->getSport()->getId(),
+                'name' => $recurringSchedule->getSport()->getName()
+            ] : null,
+            'team' => $recurringSchedule->getTeam() ? [
+                'id' => $recurringSchedule->getTeam()->getId(),
+                'name' => $recurringSchedule->getTeam()->getName()
+            ] : null,
+            'created_at' => $recurringSchedule->getCreatedAt() ? $recurringSchedule->getCreatedAt()->format('d/m/Y H:i') : null,
+            'updated_at' => $recurringSchedule->getUpdatedAt() ? $recurringSchedule->getUpdatedAt()->format('d/m/Y H:i') : null
+        ];
+        
+        return new JsonResponse($data, Response::HTTP_OK);
     }
 
     #[Route('', name: 'app_recurring_schedule_create', methods: ['POST'])]
@@ -116,7 +162,7 @@ class RecurringScheduleController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_recurring_schedule_update', methods: ['POST'])]
-    public function updateRecurringSchedule(Request $request, RecurringSchedule $recurringSchedule, EntityManagerInterface $entityManager, SerializerInterface $serializer): JsonResponse
+    public function updateRecurringSchedule(Request $request, RecurringSchedule $recurringSchedule, EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
         
@@ -163,9 +209,29 @@ class RecurringScheduleController extends AbstractController
         
         $entityManager->flush();
 
-        $jsonSchedule = $serializer->serialize($recurringSchedule, 'json', ['groups' => 'recurring_schedule:read']);
+        $response = [
+            'id' => $recurringSchedule->getId(),
+            'title' => $recurringSchedule->getTitle(),
+            'description' => $recurringSchedule->getDescription(),
+            'location' => $recurringSchedule->getLocation(),
+            'start_time' => $recurringSchedule->getStartTime() ? $recurringSchedule->getStartTime()->format('d/m/Y H:i') : null,
+            'duration' => $recurringSchedule->getDuration(),
+            'frequency' => $recurringSchedule->getFrequency(),
+            'end_date' => $recurringSchedule->getEndDate() ? $recurringSchedule->getEndDate()->format('d/m/Y H:i') : null,
+            'day_of_week' => $recurringSchedule->getDayOfWeek(),
+            'sport' => $recurringSchedule->getSport() ? [
+                'id' => $recurringSchedule->getSport()->getId(),
+                'name' => $recurringSchedule->getSport()->getName()
+            ] : null,
+            'team' => $recurringSchedule->getTeam() ? [
+                'id' => $recurringSchedule->getTeam()->getId(),
+                'name' => $recurringSchedule->getTeam()->getName()
+            ] : null,
+            'created_at' => $recurringSchedule->getCreatedAt() ? $recurringSchedule->getCreatedAt()->format('d/m/Y H:i') : null,
+            'updated_at' => $recurringSchedule->getUpdatedAt() ? $recurringSchedule->getUpdatedAt()->format('d/m/Y H:i') : null
+        ];
         
-        return new JsonResponse($jsonSchedule, Response::HTTP_OK, [], true);
+        return new JsonResponse($response, Response::HTTP_OK);
     }
 
     #[Route('/{id}', name: 'app_recurring_schedule_delete', methods: ['DELETE'])]
