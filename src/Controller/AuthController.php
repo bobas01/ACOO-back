@@ -116,8 +116,7 @@ class AuthController extends AbstractController
         }
         
         $token = bin2hex(random_bytes(32));
-        $expiresAt = new \DateTime();
-        $expiresAt->add(new \DateInterval('PT24H')); // 24 heures
+        
         
         $admin->setResetToken($token);
        
