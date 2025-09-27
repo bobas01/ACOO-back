@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Contact;
 use App\Repository\ContactRepository;
+use App\Service\EmailService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -18,7 +19,8 @@ class ContactController extends AbstractController
     public function __construct(
         private EntityManagerInterface $entityManager,
         private ContactRepository $contactRepository,
-        private SerializerInterface $serializer
+        private SerializerInterface $serializer,
+        private EmailService $emailService
     ) {}
 
     #[Route('', name: 'app_contacts_index', methods: ['GET'])]
@@ -62,7 +64,22 @@ class ContactController extends AbstractController
             $this->entityManager->persist($contact);
             $this->entityManager->flush();
 
+            // Envoi d'un email de notification (optionnel - ne doit pas empêcher la création du contact)
+            try {
+                $this->emailService->sendContactEmail(
+                    $contact->getName(),
+                    $contact->getMail(),
+                    $contact->getDescription(),
+                    $contact->getSubject()
+                );
+            } catch (\Exception $emailException) {
+                // Log l'erreur mais continue l'exécution
+                error_log('Erreur lors de l\'envoi de l\'email de contact: ' . $emailException->getMessage());
+            }
+
             $responseData = $this->serializer->serialize($contact, 'json', ['groups' => 'contact:read']);
+       
+
             return new JsonResponse($responseData, Response::HTTP_CREATED, [], true);
 
         } catch (\Exception $e) {

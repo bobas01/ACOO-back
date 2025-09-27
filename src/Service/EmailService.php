@@ -59,4 +59,31 @@ class EmailService
             return false;
         }
     }
+
+        public function sendContactEmail(string $name, string $emailAddress, string $messageContent, string $subject): bool
+    {
+        try {
+            $htmlContent = $this->twig->render('emails/contact.html.twig', [
+                'name' => $name,
+                'email' => $emailAddress,
+                'subject' => $subject,
+                'messageContent' => $messageContent 
+            ]);
+
+            $email = (new Email())
+                ->from($this->fromEmail)
+                ->to($this->fromEmail) // Envoie à l'adresse de contact du site
+                ->subject('Site web ACOO: Nouveau message de contact de ' . $name . ' : ' . $subject)
+                ->replyTo($emailAddress)
+                ->html($htmlContent);
+
+            $this->mailer->send($email);
+            return true;
+        } catch (\Exception $e) {
+            error_log('Erreur envoi email de contact: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+
 }

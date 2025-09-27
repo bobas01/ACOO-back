@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nouveau message de contact - {{ subject }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .email-container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #007bff;
+            margin: 0;
+            font-size: 24px;
+        }
+        .contact-info {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .contact-info h2 {
+            color: #007bff;
+            margin-top: 0;
+            font-size: 18px;
+        }
+        .info-row {
+            margin-bottom: 10px;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #555;
+            display: inline-block;
+            width: 100px;
+        }
+        .message-content {
+            background-color: #ffffff;
+            border-left: 4px solid #007bff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 5px 5px 0;
+        }
+        .message-content h3 {
+            color: #007bff;
+            margin-top: 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            font-size: 12px;
+            color: #666;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>📧 Nouveau message de contact</h1>
+            <p>Site web ACOO - Club Aviron</p>
+        </div>
+
+        <div class="contact-info">
+            <h2>📋 Informations du contact</h2>
+            <div class="info-row">
+                <span class="info-label">Nom :</span>
+                <strong>{{ name }}</strong>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Email :</span>
+                <a href="mailto:{{ email }}">{{ email }}</a>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Sujet :</span>
+                <strong>{{ subject }}</strong>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Date :</span>
+                {{ 'now'|date('d/m/Y à H:i') }}
+            </div>
+        </div>
+
+        <div class="message-content">
+            <h3>💬 Message :</h3>
+            <p>{{ messageContent|nl2br|raw }}</p>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <p><strong>Actions recommandées :</strong></p>
+            <p>
+                <a href="mailto:{{ email }}?subject=Re: {{ subject|url_encode }}" class="btn">
+                    📧 Répondre par email
+                </a>
+            </p>
+            <p style="font-size: 14px; color: #666; margin-top: 15px;">
+                Vous pouvez également consulter ce message depuis votre dashboard administrateur.
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>
+                <strong>Club ACOO</strong><br>
+                Cet email a été généré automatiquement depuis le site web.<br>
+                Pour répondre au visiteur, utilisez l'adresse : <a href="mailto:{{ email }}">{{ email }}</a>
+            </p>
+            <p style="margin-top: 15px;">
+                <em>Cordialement,<br>Le système automatique du site ACOO</em>
+            </p>
+        </div>
+    </div>
+</body>
+</html>
